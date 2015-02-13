@@ -91,7 +91,7 @@ pro jansen, state = state
   dimensions = state['camera'].dimensions
 
   ;;; Widget layout
-  wtop = widget_base(/column, title = 'Jansen', mbar = bar, tlb_frame_attr = 5)
+  wtop = widget_base(/row, title = 'Jansen', mbar = bar, tlb_frame_attr = 5)
 
   ;; menu bar
   jansen_menu, bar
@@ -104,6 +104,10 @@ pro jansen, state = state
                         ysize = dimensions[1], $
                         keyboard_events = state.haskey('stage'))
 
+  ;; control panel(s)
+  jansen_recording, wtop
+
+  ;;; Realize widget hierarchy
   widget_control, wtop, /realize
   widget_control, wscreen, get_value = screen
 
