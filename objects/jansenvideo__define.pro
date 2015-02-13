@@ -105,21 +105,14 @@ pro jansenVideo::StartRecording
 
   COMPILE_OPT IDL2, HIDDEN
 
-  fn = dialog_pickfile(title = 'Jansen Start Recording', $
-                       file = 'jansen', default_extension = '.h5', $
-                       /write, /overwrite_prompt, $
-                       filter = '*.h5', /fix_filter, $
-                       path = self.directory, $
-                       resource_name = 'Jansen')
-  if strlen(fn) gt 0 then $
-     self.recorder = h5video(fn, /overwrite)
+  if strlen(self.filename) gt 0 then $
+     self.recorder = h5video(self.filename, /overwrite)
 
   if ~isa(self.recorder, 'h5video') then begin
      message, 'not recording', /inf
      self.recording = 0
   endif
 
-  print, 'recording', self.recording
   ;;; update properties?
 end
 
@@ -195,6 +188,7 @@ pro jansenVideo::GetProperty, greyscale = greyscale, $
                               background = background, $
                               recording = recording, $
                               directory = directory, $
+                              filename = filename, $
                               width = width, $
                               height = height, $
                               _ref_extra = re
@@ -241,6 +235,9 @@ pro jansenVideo::GetProperty, greyscale = greyscale, $
 
   if arg_present(directory) then $
      directory = self.directory
+
+  if arg_present(filename) then $
+     filename = self.filename
 
   if arg_present(width) then $
      width = (self.camera.dimensions)[0]
@@ -304,6 +301,8 @@ function jansenVideo::Init, camera = camera, $
      self.directory = ''
   endelse
 
+  self.filename = 'jansen.h5'
+
   self.name = 'jansenvideo '
   self.description = 'Video Image '
   self.registerproperty, 'name', /string, /hide
@@ -336,14 +335,15 @@ pro jansenVideo__define
             inherits IDL_Object, $
             camera: obj_new(), $
             screen: obj_new(), $
+            recording: 0L, $
             recorder: obj_new(), $
             directory: '', $
+            filename: '', $
             playing: boolean(0), $
             hvmmode: 0L, $
             hvmorder: 0L, $
             median: obj_new(), $
             bgcounter: 0L, $
-            recording: 0L, $
             time: 0.D, $
             timer: 0L $
            }

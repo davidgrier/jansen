@@ -22,10 +22,22 @@ pro jansen_menu_event, event
   case uval of
      'SNAPSHOT': video.saveimage
      'RECORD': begin
-        video.recording = (video.recording gt 0) ? 0 : 1
+        if ~video.recording then begin
+           filename = video.filename
+           fn = dialog_pickfile(title = 'Jansen Start Recording', $
+                                file = filename, default_extension = '.h5', $
+                                /write, /overwrite_prompt, $
+                                filter = '*.h5', /fix_filter, $
+                                path = video.directory, $
+                                resource_name = 'Jansen')
+           if (fn.length gt 0) then begin
+              video.filename = fn
+              video.recording = 1
+           endif
+        endif else $
+           video.recording = 0
         widget_control, event.id, $
-                        set_value = (video.recording gt 0) ? $
-                        'Stop Recording!' : 'Record'
+                        set_value = (~video.recording) ? 'Record' : 'Stop Recording!'
      end
      else: print, uval
   endcase
