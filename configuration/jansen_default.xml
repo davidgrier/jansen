@@ -1,0 +1,19 @@
+<configuration>
+  <camera object="fabcamera_fake"
+	  dimensions="[640,480]"
+	  greyscale="1">
+  </camera>
+
+  <imagelaser object="fablaser_fake"
+              wavelength="0.447"
+              emission="0">
+  </imagelaser>
+
+  <stage object="fabstage_fake">
+  </stage>
+
+  <video directory="./"
+	 nthreads="default">
+  </video>
+
+</configuration>
