@@ -105,7 +105,7 @@ pro jansen, state = state
                         keyboard_events = state.haskey('stage'))
 
   ;; control panel(s)
-  jansen_recording, wtop
+  jansen_recording, wtop, state.video
 
   ;;; Realize widget hierarchy
   widget_control, wtop, /realize
@@ -113,7 +113,7 @@ pro jansen, state = state
 
   ;;; Graphics hierarchy
   imagemodel = IDLgrModel()
-  imagemodel.add, state['video']
+  imagemodel.add, state.video
 
   imageview = IDLgrView(viewplane_rect = [0, 0, dimensions])
   imageview.add, imagemodel

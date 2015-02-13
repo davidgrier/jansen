@@ -69,6 +69,7 @@ pro jansenVideo::handleTimerEvent, id, userdata
         self.screen.getproperty, image_data = data
         self.recorder.write, data
      end
+     4: ; do nothing: paused
      else: if obj_valid(self.recorder) then $
         obj_destroy, self.recorder
   endcase
@@ -128,6 +129,7 @@ pro jansenVideo::SetProperty, greyscale = greyscale, $
                               framerate = framerate, $
                               recording = recording, $
                               directory = directory, $
+                              filename = filename, $
                               _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
@@ -168,6 +170,10 @@ pro jansenVideo::SetProperty, greyscale = greyscale, $
         self.directory = dir $
      else $
         message, 'Could not change directory to '+directory, /inf
+  endif
+
+  if isa(filename, 'string') then begin
+     self.filename = filename
   endif
   
 end
