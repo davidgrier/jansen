@@ -6,7 +6,6 @@
 ; CAMERA:     reference to fabcamera object that will provide images
 ; ORDER:      flag: set to flip image vertically
 ; FRAMERATE:  number of images per second
-; DIRECTORY:  directory into which to record video files
 ;
 ; MODIFICATION HISTORY
 ; 02/12/2015 Written by David G. Grier, New York University
@@ -27,13 +26,8 @@ function jansenconfigure_video, configuration
      if execute('a = '+configuration['video_framerate'], 1, 1) then $
         framerate = a
 
-  if configuration.haskey('video_directory') then $
-     if execute('a = '+configuration['video_directory'], 1, 1) then $
-        directory = a
-
   video = jansenvideo(camera = camera, order = order, $
-                      framerate = framerate, $
-                      directory = directory)
+                      framerate = framerate)
 
   if ~isa(video, 'jansenvideo') then $
      configuration['error'] = 'could not initialize video system'

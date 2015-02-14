@@ -18,24 +18,55 @@
 ;    playing    [ GS]: If set, video screen updates at framerate
 ;    hvmmode    [ GS]: If set, video is normalized by background image
 ;    background [ G ]: Background image for hvmmode
-;    recording  [ GS]: 0: paused, not recording
-;                      1: record video from camera
-;                      2: record video from screen
-;                      3: record video from window
-;    directory  [IGS]: string: directory for recording video files.
 ;
 ; METHODS
 ;    GetProperty
 ;    SetProperty
 ;
-;    SaveImage: Save one snapshot
-;    SelectDirectory: Choose directory for recording images
-;
 ; MODIFICATION HISTORY:
 ; 02/12/2015 Written by David G. Grier, New York University
+; 02/14/2015 remove all recording elements.  Recording will be
+;    handled by callbacks.
 ;
 ; Copyright (c) 2015 David G. Grier
 ;-
+
+;;;;;
+;
+; jansenVideo::registerCallback
+;
+pro jansenVideo::registerCallback, name, object
+
+  COMPILE_OPT IDL2, HIDDEN
+
+  if obj_valid(object) && isa(name, 'string') then $
+     self.callbacks[name] = object
+end
+
+;;;;;
+;
+; jansenVideo::unregisterCallback
+;
+pro jansenVideo::unregisterCallback, name
+
+  COMPILE_OPT IDL2, HIDDEN
+
+  if self.callbacks.haskey(name) then $
+     self.callbacks.remove, name
+end
+
+;;;;;
+;
+; jansenVideo::handleCallbacks
+;
+pro jansenVideo::handleCallbacks
+
+  COMPILE_OPT IDL2, HIDDEN
+
+  foreach object, self.callbacks do $
+     call_method, 'callback', object, self
+
+end
 
 ;;;;;
 ;
@@ -48,32 +79,16 @@ pro jansenVideo::handleTimerEvent, id, userdata
   self.timer = timer.set(self.time, self)
   data = self.camera.read()
 
-  if (self.hvmmode ne 0) then $
-     self.IDLgrImage::setproperty, $
-     data = byte(128.*float(data)/self.median.get() < 255) $
-  else $
-     self.IDLgrImage::setproperty, data = data
+  self.IDLgrImage::SetProperty, data = (self.hvmmode eq 0) ? $
+                                       data : $
+                                       byte(128.*float(data)/self.median.get() < 255)
   self.screen.draw
 
   if (self.hvmmode eq 1) || $
      ((self.hvmmode eq 2) && ~(self.median.initialized)) then $
         self.median.add, data
 
-  case self.recording of
-     1: self.recorder.write, data
-     2: begin
-        self.IDLgrImage::getproperty, data = data
-        self.recorder.write, data
-     end
-     3: begin
-        self.screen.getproperty, image_data = data
-        self.recorder.write, data
-     end
-     4: ; do nothing: paused
-     else: if obj_valid(self.recorder) then $
-        obj_destroy, self.recorder
-  endcase
-  
+  self.handleCallbacks
 end
 
 ;;;;;
@@ -100,25 +115,6 @@ end
 
 ;;;;;
 ;
-; jansenVideo::StartRecording
-;
-pro jansenVideo::StartRecording
-
-  COMPILE_OPT IDL2, HIDDEN
-
-  if strlen(self.filename) gt 0 then $
-     self.recorder = h5video(self.filename, /overwrite)
-
-  if ~isa(self.recorder, 'h5video') then begin
-     message, 'not recording', /inf
-     self.recording = 0
-  endif
-
-  ;;; update properties?
-end
-
-;;;;;
-;
 ; jansenVideo::SetProperty
 ;
 pro jansenVideo::SetProperty, greyscale = greyscale, $
@@ -127,9 +123,6 @@ pro jansenVideo::SetProperty, greyscale = greyscale, $
                               hvmorder = hvmorder, $
                               screen = screen, $
                               framerate = framerate, $
-                              recording = recording, $
-                              directory = directory, $
-                              filename = filename, $
                               _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
@@ -156,26 +149,6 @@ pro jansenVideo::SetProperty, greyscale = greyscale, $
   if isa(framerate, /scalar, /number) then $
      self.time = 1./double(abs(framerate))
 
-  if isa(recording, /scalar, /number) then begin
-     self.recording = recording
-     if (self.recording gt 0) then $
-        self.startrecording
-  endif
-
-  if isa(directory, 'string') then begin
-     if ~file_search(directory, /TEST_DIRECTORY, /EXPAND_TILDE) then $
-        file_mkdir, directory
-     dir = file_search(directory, /TEST_DIRECTORY, /EXPAND_TILDE, /TEST_WRITE)
-     if dir.length gt 0 then $
-        self.directory = dir $
-     else $
-        message, 'Could not change directory to '+directory, /inf
-  endif
-
-  if isa(filename, 'string') then begin
-     self.filename = filename
-  endif
-  
 end
 
 ;;;;;
@@ -185,16 +158,12 @@ end
 pro jansenVideo::GetProperty, greyscale = greyscale, $
                               camera = camera, $
                               median = median, $
-                              recorder = recorder, $
                               screen = screen, $
                               framerate = framerate, $
                               playing = playing, $
                               hvmmode = hvmmode, $
                               hvmorder = hvmorder, $
                               background = background, $
-                              recording = recording, $
-                              directory = directory, $
-                              filename = filename, $
                               width = width, $
                               height = height, $
                               _ref_extra = re
@@ -202,8 +171,6 @@ pro jansenVideo::GetProperty, greyscale = greyscale, $
   COMPILE_OPT IDL2, HIDDEN
 
   self.camera.getproperty, _extra = re
-  if isa(self.recorder, 'h5video') then $
-     self.recorder.getproperty, _extra = re
   self.IDLgrImage::GetProperty, _extra = re
 
   if arg_present(greyscale) then $
@@ -214,9 +181,6 @@ pro jansenVideo::GetProperty, greyscale = greyscale, $
 
   if arg_present(median) then $
      median = self.median
-
-  if arg_present(recorder) then $
-     recorder = self.recorder
 
   if arg_present(screen) then $
      screen = self.screen
@@ -236,15 +200,6 @@ pro jansenVideo::GetProperty, greyscale = greyscale, $
   if arg_present(background) then $
      background = self.median.get()
 
-  if arg_present(recording) then $
-     recording = self.recording
-
-  if arg_present(directory) then $
-     directory = self.directory
-
-  if arg_present(filename) then $
-     filename = self.filename
-
   if arg_present(width) then $
      width = (self.camera.dimensions)[0]
 
@@ -261,7 +216,6 @@ pro jansenVideo::Cleanup
   COMPILE_OPT IDL2, HIDDEN
 
   obj_destroy, self.camera
-  obj_destroy, self.recorder
 end
 
 ;;;;;
@@ -272,7 +226,6 @@ function jansenVideo::Init, camera = camera, $
                             screen = screen, $
                             framerate = framerate, $
                             hvmorder = hvmorder, $
-                            directory = directory, $
                             _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
@@ -296,18 +249,7 @@ function jansenVideo::Init, camera = camera, $
   self.time = (isa(framerate, /scalar, /number)) ? $
               1./double(abs(framerate)) : 1./29.97D
 
-  dir = isa(directory, 'string') ? directory : '~/data'
-  if ~file_search(dir, /TEST_DIRECTORY, /EXPAND_TILDE) then $
-     file_mkdir, dir
-  dir = file_search(dir, /TEST_DIRECTORY, /EXPAND_TILDE, /TEST_WRITE)
-  if dir.length gt 0 then $
-     self.directory = dir $
-  else begin
-     message, 'Could not set data directory to ' + self.directory
-     self.directory = ''
-  endelse
-
-  self.filename = 'jansen.h5'
+  self.callbacks = hash()
 
   self.name = 'jansenvideo '
   self.description = 'Video Image '
@@ -321,6 +263,7 @@ function jansenVideo::Init, camera = camera, $
   self.registerproperty, 'recording', $
      enum = ['Paused', 'From Camera', 'From Screen', 'From Window']
   self.registerproperty, 'directory', /string
+  self.registerproperty, 'filename', /string
   self.registerproperty, 'greyscale', /boolean, sensitive = 0
   self.registerproperty, 'width', /integer, sensitive = 0
   self.registerproperty, 'height', /integer, sensitive = 0
@@ -342,15 +285,14 @@ pro jansenVideo__define
             camera: obj_new(), $
             screen: obj_new(), $
             recording: 0L, $
-            recorder: obj_new(), $
-            directory: '', $
-            filename: '', $
             playing: boolean(0), $
             hvmmode: 0L, $
             hvmorder: 0L, $
             median: obj_new(), $
             bgcounter: 0L, $
             time: 0.D, $
-            timer: 0L $
+            timer: 0L, $
+            callback: obj_new(), $
+            callbacks: obj_new() $
            }
 end

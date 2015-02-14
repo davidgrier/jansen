@@ -95,17 +95,27 @@ pro jansen, state = state
 
   ;; menu bar
   jansen_menu, bar
-  
-  ;; video screen
-  ;; sized to fit camera
-  ;; keyboard evens move stage, if attached
-  wscreen = widget_draw(wtop, graphics_level = 2, $ ; object graphics
-                        xsize = dimensions[0], $
-                        ysize = dimensions[1], $
-                        keyboard_events = state.haskey('stage'))
 
-  ;; control panel(s)
-  jansen_recording, wtop, state.video
+  ;; data displays
+  wdata = widget_tab(wtop)
+  ;; 1. video screen
+  wscreentab = widget_base(wdata, title = 'Image')               ; for WIDGET_TAB
+  wscreen = widget_draw(wscreentab, graphics_level = 2, $        ; object graphics
+                        xsize = dimensions[0], $                 ; sized to fit camera
+                        ysize = dimensions[1], $
+                        keyboard_events = state.haskey('stage')) ; keyboard moves stage
+
+  ;; 2. control panel(s)
+  wcontrol = widget_base(wtop, /column)
+  wtabs = widget_tab(wcontrol)
+  wrecording = jansen_recording(wtabs)
+
+  ;; 3. logo!
+;  wlogo = widget_base(wcontrol, /row)
+  logo = transpose(read_png(file_dirname(routine_filepath('jansen'))+'/csmrlogosm.png'), [1, 2, 0])
+
+  wlogo = widget_button(wcontrol, value = logo, /bitmap, $
+                        uvalue = 'logo', /align_right)
 
   ;;; Realize widget hierarchy
   widget_control, wtop, /realize
