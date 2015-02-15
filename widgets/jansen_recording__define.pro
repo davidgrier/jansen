@@ -67,9 +67,11 @@ pro jansen_recording::handleEvent, event
                     if (filename = self.hasvalidfilename()) then begin
                        self.recorder = h5video(filename, /overwrite, $
                                                metadata = self.metadata(state))
-                       video.registercallback, 'recorder', self
-                       self.framenumber = 0
-                       self.recording = 1
+                       if isa(self.recorder, 'h5video') then begin
+                          video.registercallback, 'recorder', self
+                          self.framenumber = 0
+                          self.recording = 1
+                       endif
                     endif
                  end
                  -1: self.recording = 1 ; ... paused, so unpause
