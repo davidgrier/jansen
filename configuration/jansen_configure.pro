@@ -47,7 +47,7 @@ function jansen_configure
   components.add, nuconf_camera(configuration)
   components.add, nuconf_imagelaser(configuration)
   components.add, nuconf_stage(configuration)
-  components.add, jansenconfigure_video(configuration)
+  components.add, jansen_configure_video(configuration)
 
   ;;; Incorporate configuration information into jansen state
   state = dictionary()
