@@ -55,38 +55,47 @@ pro jansen_recording::handleEvent, event
         widget_control, event.id, set_value = self.filename
      end
      
-     'TARGET': begin
-        print, event.value
-     end
+     'TARGET': ; nothing to do
      
      'RECORD': begin
         case event.value of
            'RECORD': begin
-              case self.recording of
-                 0: begin               ; ... not previous recording, so start
+              case self.state of
+                 'NORMAL': begin                    ; ... not recording, so start
                     if (filename = self.hasvalidfilename()) then begin
                        self.recorder = h5video(filename, /overwrite, $
                                                metadata = self.metadata(state))
                        if isa(self.recorder, 'h5video') then begin
                           video.registercallback, 'recorder', self
                           self.framenumber = 0
-                          self.recording = 1
+                          self.state = 'RECORDING'
                        endif
                     endif
                  end
-                 -1: self.recording = 1 ; ... paused, so unpause
-                 else:                  ; ... already recording, carry on
+                 'PAUSED': self.state = 'RECORDING' ; ... paused, so unpause
+                 else:                              ; ... already recording, carry on
               endcase
            end
            
-           'PAUSE': self.recording *= -1 ; pause/unpause
+           'PAUSE': begin
+              case self.state of
+                 'RECORDING': self.state = 'PAUSED'
+                 'PAUSED': self.state = 'RECORDING'
+                 'REPLAYING': video.playing = ~video.playing
+                 else:          ; nothing to do
+              endcase
+           end
            
-           'STOP': begin                ; stop recording, close file
-              if (self.recording ne 0) then begin
+           'STOP': begin        ; stop recording, close file
+              video.playing = 0
+              if (self.state eq 'REPLAYING') then $
+                 video.camera = state.camera
+              if (self.state ne 'NORMAL') then begin
                  video.unregistercallback, 'recorder'
-                 self.recording = 0
                  self.recorder.close
               endif
+              self.state = 'NORMAL'
+              video.playing = 1
            end
            
            'SNAPSHOT': self.saveimage, video.screendata
@@ -96,22 +105,58 @@ pro jansen_recording::handleEvent, event
      end
 
      'REPLAY': begin
-        ;;; If recording, then stop and close h5video file.
-        ;;;   Perhaps implement pause rather than stop?
-        ;;;   perhaps by implementing /APPEND for h5video?
-        ;;; Back up camera source for video object
-        ;;; Link h5video to video as camera source (has Read())
-        ;;; Upon STOP,
-        ;;;    close h5video
-        ;;;    restore camera source to video object
-        ;;;    if recording, then reopen to continue recording???
-        print, uval, event.value
         case event.value of
-           'REWIND':
-           'PAUSE':
-           'PLAY':
+           'REWIND': begin
+              if (self.state eq 'REPLAYING') then begin
+                 self.recorder.index = 0
+              endif
+           end
+           
+           'PAUSE': begin
+              case self.state of
+                 'RECORDING': self.state = 'PAUSED'
+                 'PAUSED': self.state = 'RECORDING'
+                 'REPLAYING': video.playing = ~video.playing
+                 else:          ; nothing to do
+              endcase
+           end
+
+           'PLAY': begin
+              if ~(self.state eq 'REPLAYING') then begin   ; start replaying
+                 if (self.state eq 'RECORDING') then begin ; stop recording
+                    video.unregistercallback, 'recorder'
+                    self.state = 'NORMAL'
+                    self.recorder.close
+                 endif
+                 ;; open replay file
+                 filename = self.hasvalidfilename(/read)
+                 if isa(filename, 'string') then begin
+                    video.playing = 0
+                    self.recorder = h5video(filename) ; open for reading
+                    if isa(self.recorder, 'h5video') then begin
+                       video.camera = self.recorder
+                       video.registercallback, 'recorder', self
+                       self.state = 'REPLAYING'
+                    endif
+                 endif
+              endif
+              video.playing = 1
+           end
+           
            'FAST':
-           'STOP':
+
+           'STOP': begin
+              video.playing = 0
+              if (self.state eq 'REPLAYING') then $
+                 video.camera = state.camera
+              if (self.state ne 'NORMAL') then begin
+                 video.unregistercallback, 'recorder'
+                 self.recorder.close
+              endif
+              self.state = 'NORMAL'
+              video.playing = 1
+           end
+           
            else:
         endcase
      end
@@ -129,12 +174,14 @@ end
 ;
 ; jansen_recording::hasvalidfilename
 ;
-function jansen_recording::hasvalidfilename
+function jansen_recording::hasvalidfilename, read = read
 
   COMPILE_OPT IDL2
 
   filename = self.filename
   directory = self.directory
+
+  write_flag = ~keyword_set(read)
 
 ;  if (filename.length eq 0) then $ ; IDL 8.4
   if strlen(filename) eq 0 then $
@@ -146,13 +193,21 @@ function jansen_recording::hasvalidfilename
      filename = file_basename(filename)
   endif
 
-  if ~file_test(directory, /directory) then $
+  ;; Check that directory exists, or can be created
+  if write_flag then begin
+     if ~file_test(directory, /directory) then $
      file_mkdir, directory
 
-  if ~file_test(directory, /directory, /write) then begin
-     res = dialog_message('Cannot write to '+directory)
-     return, !NULL
-  endif
+     if ~file_test(directory, /directory, /write) then begin
+        res = dialog_message('Cannot write to '+directory)
+        return, !NULL
+     endif
+  endif else begin
+     if ~file_test(directory, /directory, /read) then begin
+        res = dialog_message('Cannot read from '+directory)
+        return, !NULL
+     endif
+  endelse
 
   directory = file_search(directory, /expand_tilde, /expand_environment, /mark_directory)
   
@@ -162,21 +217,29 @@ function jansen_recording::hasvalidfilename
   
   fullname = directory + filename
 
-  if file_test(fullname) then begin
-     res = dialog_message(fullname + ' already exists. Overwrite?', $
-                          /QUESTION, /DEFAULT_NO)
-     if (res eq 'No') then $
-        return, !NULL
-     if ~file_test(fullname, /WRITE) then begin
-        res = dialog_message('Cannot overwrite '+fullname)
+  ;; Check that file can be written, or read, as needed
+  if write_flag then begin
+     if file_test(fullname) then begin
+        res = dialog_message(fullname + ' already exists. Overwrite?', $
+                             /question, /default_no)
+        if (res eq 'No') then $
+           return, !NULL
+        if ~file_test(fullname, /write) then begin
+           res = dialog_message('Cannot overwrite '+fullname)
+           return, !NULL
+        endif
+     endif
+  endif else begin
+     if ~file_test(fullname) then begin
+        res = dialog_message('Cannot read '+fullname)
         return, !NULL
      endif
-  endif
+  endelse
 
   self.directory = directory
   self.filename = filename
 
-  return, self.directory + self.filename
+  return, fullname
 end
 
 ;;;;;
@@ -220,18 +283,20 @@ pro jansen_recording::Callback, video
 
   COMPILE_OPT IDL2, HIDDEN
 
-  if (self.recording ge 1L) then begin
+  if (self.state eq 'RECORDING') then begin
      widget_control, self.wtarget, get_value = targetnumber
      if self.framenumber lt targetnumber then begin
-        self.recorder.write, (self.recording eq 1L) ? video.data : video.screendata
+        self.recorder.write, video.data ; (self.state eq 'RECORDING') ? video.data : video.screendata
         self.framenumber++
      endif else begin
         video.unregistercallback, 'recorder'
-        self.recording = 0L
+        self.state = 'NORMAL'
         self.recorder.close
         self.framenumber = 0
      endelse
-     widget_control, self.wframenumber, set_value = self.framenumber
+     widget_control, self.wframenumber, set_value = self.framenumber     
+  endif else if (self.state eq 'REPLAYING') then begin
+     widget_control, self.wframenumber, set_value = self.recorder.index
   endif
 end
 
@@ -306,7 +371,7 @@ pro jansen_recording__define, wtop
   COMPILE_OPT IDL2, HIDDEN
 
   struct = {Jansen_Recording, $
-            recording: 0L, $
+            state: '', $        ; 'paused', 'recording', 'replaying'
             recorder: obj_new(), $
             directory: '', $
             filename: '', $            

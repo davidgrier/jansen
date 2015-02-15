@@ -107,7 +107,8 @@ end
 ;
 ; jansen_video::SetProperty
 ;
-pro jansen_video::SetProperty, greyscale = greyscale, $
+pro jansen_video::SetProperty, camera = camera, $
+                               greyscale = greyscale, $
                                playing =  playing, $
                                hvmmode = hvmmode, $
                                hvmorder = hvmorder, $
@@ -117,7 +118,11 @@ pro jansen_video::SetProperty, greyscale = greyscale, $
 
   COMPILE_OPT IDL2, HIDDEN
 
-  self.camera.setproperty, greyscale = greyscale, _extra = re
+  if obj_valid(camera) then $
+     self.camera = camera
+  
+;  self.camera.setproperty, greyscale = greyscale, _extra = re
+  self.camera.setproperty, _extra = re
   self.IDLgrImage::SetProperty, _extra = re
 
   if isa(screen, 'IDLgrWindow') then $
