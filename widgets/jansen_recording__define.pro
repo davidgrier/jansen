@@ -167,12 +167,26 @@ function jansen_recording::metadata, state
   COMPILE_OPT IDL2, HIDDEN
 
   info = get_login_info()
-  meta = {creator: 'jansen', $
-          machine_name: info.machine_name, $
-          user_name: info.user_name, $
-          lambda: state.imagelaser.wavelength, $
-          mpp: state.camera.mpp}
-  return, meta
+
+  camera = state['camera']
+  exposure = (camera.hasproperty('exposure')) ? $
+             camera.exposure : $
+             'unknown'
+
+  gain = (camera.hasproperty('gain')) ? $
+         camera.gain : $
+         'unknown'
+  
+  metadata = {creator:       'jansen', $
+              machine_name:  info.machine_name, $
+              user_name:     info.user_name, $
+              camera:        camera.name, $
+              exposure_time: exposure, $
+              gain:          gain, $
+              lambda:        state.imagelaser.wavelength, $
+              mpp:           camera.mpp}
+  
+  return, metadata
 end
 
 ;;;;;
