@@ -59,7 +59,7 @@ pro jansen_recording::handleEvent, event
         print, event.value
      end
      
-     'CONTROLS': begin
+     'RECORD': begin
         case event.value of
            'RECORD': begin
               case self.recording of
@@ -91,6 +91,27 @@ pro jansen_recording::handleEvent, event
            
            'SNAPSHOT': self.saveimage, video.screendata
               
+           else:
+        endcase
+     end
+
+     'REPLAY': begin
+        ;;; If recording, then stop and close h5video file.
+        ;;;   Perhaps implement pause rather than stop?
+        ;;;   perhaps by implementing /APPEND for h5video?
+        ;;; Back up camera source for video object
+        ;;; Link h5video to video as camera source (has Read())
+        ;;; Upon STOP,
+        ;;;    close h5video
+        ;;;    restore camera source to video object
+        ;;;    if recording, then reopen to continue recording???
+        print, uval, event.value
+        case event.value of
+           'REWIND':
+           'PAUSE':
+           'PLAY':
+           'FAST':
+           'STOP':
            else:
         endcase
      end
@@ -243,13 +264,21 @@ function jansen_recording::Init, wtop
                           title = '# Frames: ', UVALUE = 'TARGET')
 
   bvalues      = ['Record', 'Pause', 'Stop', 'Snapshot']
-  wcontrols    = cw_bgroup(wrecording, bvalues, /ROW, $
+  wrecord      = cw_bgroup(wrecording, bvalues, /ROW, $
+                           LABEL_LEFT = 'Record', $
                            button_uvalue = strupcase(bvalues), $
-                           /FRAME, /NO_RELEASE, UVALUE = 'CONTROLS')
+                           /FRAME, /NO_RELEASE, UVALUE = 'RECORD')
+
+  bvalues      = ['Rewind', 'Pause', 'Play', 'Fast', 'Stop']
+  wreplay      = cw_bgroup(wrecording, bvalues, /ROW, $
+                           LABEL_LEFT = 'Replay', $
+                           button_uvalue = strupcase(bvalues), $
+                           /FRAME, /NO_RELEASE, UVALUE = 'REPLAY')
 
   wframenumber = cw_field(wrecording, /FRAME, /NOEDIT, /ULONG, $
                           VALUE = 0UL, $
-                          title = 'Frame #:  ')                     
+                          title = 'Frame #:  ')
+  
   wfeatures    = cw_field(wrecording, /FRAME, /NOEDIT, /ULONG, $
                           VALUE = 0UL, $
                           title = 'Feature #:')
@@ -257,7 +286,7 @@ function jansen_recording::Init, wtop
   bvalues = ['Normal', 'Running', 'Sample/Hold']
   whvmmode = cw_bgroup(wrecording, bvalues, $
                        /ROW, /FRAME, $
-                       LABEL_TOP = 'HVM Mode:', $
+                       LABEL_LEFT = 'Mode', $
                        /EXCLUSIVE, /NO_RELEASE, $
                        SET_VALUE = 0, UVALUE = 'HVMMODE')
 
