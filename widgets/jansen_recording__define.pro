@@ -34,6 +34,23 @@ end
 
 ;;;;;
 ;
+; jansen_recording::metadata()
+;
+function jansen_recording::metadata, state
+
+  COMPILE_OPT IDL2, HIDDEN
+
+  info = get_login_info()
+  meta = {creator: 'jansen', $
+          machine_name: info.machine_name, $
+          user_name: info.user_name, $
+          lambda: state.imagelaser.wavelength, $
+          mpp: state.camera.mpp}
+  return, meta
+end
+
+;;;;;
+;
 ; jansen_recording_event
 ;
 pro jansen_recording::handleEvent, event
@@ -64,13 +81,10 @@ pro jansen_recording::handleEvent, event
               case self.recording of
                  0: begin               ; ... not previous recording, so start
                     if self.hasvalidfilename() then begin
-                       info = get_login_info()
-                       meta = {machine_name: info.machine_name, $
-                               user_name: info.user_name, $
-                               lambda: state.imagelaser.wavelength, $
-                               mpp: state.camera.mpp}
+                       
                        self.recorder = h5video(self.directory+self.filename, $
-                                               /overwrite, metadata = meta)
+                                               /overwrite, $
+                                               metadata = self.metadata(state))
                        video.registercallback, 'recorder', self
                        self.framenumber = 0
                        self.recording = 1
