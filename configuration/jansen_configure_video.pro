@@ -1,6 +1,6 @@
 ;+
 ; NAME
-;    jansenconfigure_video()
+;    jansen_configure_video()
 ;
 ; Options:
 ; CAMERA:     reference to fabcamera object that will provide images
@@ -12,7 +12,7 @@
 ;
 ; Copyright (c) 2015 David G. Grier
 ;-
-function jansenconfigure_video, configuration
+function jansen_configure_video, configuration
 
   COMPILE_OPT IDL2, HIDDEN
 
@@ -26,10 +26,10 @@ function jansenconfigure_video, configuration
      if execute('a = '+configuration['video_framerate'], 1, 1) then $
         framerate = a
 
-  video = jansenvideo(camera = camera, order = order, $
-                      framerate = framerate)
+  video = jansen_video(camera = camera, order = order, $
+                       framerate = framerate)
 
-  if ~isa(video, 'jansenvideo') then $
+  if ~isa(video, 'jansen_video') then $
      configuration['error'] = 'could not initialize video system'
 
   configuration['video'] = video

@@ -1,24 +1,33 @@
 ;+
 ; NAME:
-;    jansenvideo
+;    jansen_video
 ;
 ; PURPOSE:
-;    Video screen for jansen system
+;    Video source for jansen system.  This object periodically
+;    requests an image from an attached camera and displays that image
+;    on an attached screen.
+;
+;    It optionally runs the image through a filter before displaying.
+;
+;    It maintains a list of callback functions that are called every
+;    time an image is acquired.
 ;
 ; INHERITS:
 ;    IDLgrImage
 ;    IDL_Object
 ;
-; PROPERTIES
-;    camera     [RG ]: fabcamera object that provides images
+; PROPERTIES:
+;    camera     [RG ]: jansen_camera object that provides images
 ;    width      [ G ]: width of camera image
 ;    height     [ G ]: height of camera image
 ;    screen     [RG ]: IDLgrWindow on which the image is drawn
 ;    framerate  [IGS]: number of frames per second
-;    playing    [ GS]: If set, video screen updates at framerate
+;    playing    [ GS]: If set, update video screen at framerate
 ;    hvmmode    [ GS]: If set, video is normalized by background image
 ;    background [ G ]: Background image for hvmmode
 ;
+; CALLBACKS:
+;    
 ; METHODS
 ;    GetProperty
 ;    SetProperty
@@ -33,9 +42,9 @@
 
 ;;;;;
 ;
-; jansenVideo::registerCallback
+; jansen_video::registerCallback
 ;
-pro jansenVideo::registerCallback, name, object
+pro jansen_video::registerCallback, name, object
 
   COMPILE_OPT IDL2, HIDDEN
 
@@ -45,9 +54,9 @@ end
 
 ;;;;;
 ;
-; jansenVideo::unregisterCallback
+; jansen_video::unregisterCallback
 ;
-pro jansenVideo::unregisterCallback, name
+pro jansen_video::unregisterCallback, name
 
   COMPILE_OPT IDL2, HIDDEN
 
@@ -57,9 +66,9 @@ end
 
 ;;;;;
 ;
-; jansenVideo::handleCallbacks
+; jansen_video::handleCallbacks
 ;
-pro jansenVideo::handleCallbacks
+pro jansen_video::handleCallbacks
 
   COMPILE_OPT IDL2, HIDDEN
 
@@ -70,9 +79,9 @@ end
 
 ;;;;;
 ;
-; jansenVideo::handleTimerEvent
+; jansen_video::handleTimerEvent
 ;
-pro jansenVideo::handleTimerEvent, id, userdata
+pro jansen_video::handleTimerEvent, id, userdata
 
   COMPILE_OPT IDL2, HIDDEN
 
@@ -96,15 +105,15 @@ end
 
 ;;;;;
 ;
-; jansenVideo::SetProperty
+; jansen_video::SetProperty
 ;
-pro jansenVideo::SetProperty, greyscale = greyscale, $
-                              playing =  playing, $
-                              hvmmode = hvmmode, $
-                              hvmorder = hvmorder, $
-                              screen = screen, $
-                              framerate = framerate, $
-                              _ref_extra = re
+pro jansen_video::SetProperty, greyscale = greyscale, $
+                               playing =  playing, $
+                               hvmmode = hvmmode, $
+                               hvmorder = hvmorder, $
+                               screen = screen, $
+                               framerate = framerate, $
+                               _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
 
@@ -134,22 +143,22 @@ end
 
 ;;;;;
 ;
-; jansenVideo::GetProperty
+; jansen_video::GetProperty
 ;
-pro jansenVideo::GetProperty, data = data, $
-                              screendata = screendata, $
-                              greyscale = greyscale, $
-                              camera = camera, $
-                              median = median, $
-                              screen = screen, $
-                              framerate = framerate, $
-                              playing = playing, $
-                              hvmmode = hvmmode, $
-                              hvmorder = hvmorder, $
-                              background = background, $
-                              width = width, $
-                              height = height, $
-                              _ref_extra = re
+pro jansen_video::GetProperty, data = data, $
+                               screendata = screendata, $
+                               greyscale = greyscale, $
+                               camera = camera, $
+                               median = median, $
+                               screen = screen, $
+                               framerate = framerate, $
+                               playing = playing, $
+                               hvmmode = hvmmode, $
+                               hvmorder = hvmorder, $
+                               background = background, $
+                               width = width, $
+                               height = height, $
+                               _ref_extra = re
   
   COMPILE_OPT IDL2, HIDDEN
 
@@ -198,9 +207,9 @@ end
 
 ;;;;;
 ;
-; jansenVideo::Cleanup
+; jansen_video::Cleanup
 ;
-pro jansenVideo::Cleanup
+pro jansen_video::Cleanup
 
   COMPILE_OPT IDL2, HIDDEN
 
@@ -209,13 +218,13 @@ end
 
 ;;;;;
 ;
-; jansenVideo::Init()
+; jansen_video::Init()
 ;
-function jansenVideo::Init, camera = camera, $
-                            screen = screen, $
-                            framerate = framerate, $
-                            hvmorder = hvmorder, $
-                            _ref_extra = re
+function jansen_video::Init, camera = camera, $
+                             screen = screen, $
+                             framerate = framerate, $
+                             hvmorder = hvmorder, $
+                             _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
 
@@ -258,13 +267,13 @@ end
 
 ;;;;;
 ;
-; jansenVideo__define
+; jansen_video__define
 ;
-pro jansenVideo__define
+pro jansen_video__define
 
   COMPILE_OPT IDL2, HIDDEN
 
-  struct = {jansenVideo, $
+  struct = {jansen_video, $
             inherits IDLgrImage, $
             inherits IDL_Object, $
             camera: obj_new(), $

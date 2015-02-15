@@ -115,7 +115,6 @@ pro jansen, state = state
 
   ;; 3. logo!
   logo = transpose(read_png(file_dirname(routine_filepath('jansen'))+'/csmrlogosm.png'), [1, 2, 0])
-
   wlogo = widget_button(wcontrol, value = logo, /bitmap, $
                         uvalue = 'logo', /align_center)
 
