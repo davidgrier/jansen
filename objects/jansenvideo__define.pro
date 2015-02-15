@@ -92,27 +92,7 @@ pro jansenVideo::handleTimerEvent, id, userdata
   self.handleCallbacks
 end
 
-;;;;;
-;
-; jansenVideo::SaveImage
-;
-pro jansenVideo::SaveImage, filename
 
-  COMPILE_OPT IDL2, HIDDEN
-
-  if ~isa(filename, 'string') then $
-     filename = dialog_pickfile(title = 'Jansen Save Snapshot', $
-                                filter = '*.png', /fix_filter, $
-                                directory = self.directory, $
-                                file = 'jansen_snapshot', $
-                                default_extension = 'png', $
-                                /write, /overwrite_prompt, $
-                                resource_name = 'Jansen')
-  if strlen(filename) gt 0 then begin
-     self.IDLgrImage::GetProperty, data = snapshot
-     write_png, filename, snapshot
-  endif
-end
 
 ;;;;;
 ;
@@ -157,6 +137,7 @@ end
 ; jansenVideo::GetProperty
 ;
 pro jansenVideo::GetProperty, data = data, $
+                              screendata = screendata, $
                               greyscale = greyscale, $
                               camera = camera, $
                               median = median, $
@@ -177,6 +158,9 @@ pro jansenVideo::GetProperty, data = data, $
 
   if arg_present(data) then $
      data = self.camera.data
+
+  if arg_present(screendata) then $
+     self.IDLgrImage::GetProperty, data = screendata
   
   if arg_present(greyscale) then $
      greyscale = self.camera.greyscale

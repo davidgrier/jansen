@@ -13,6 +13,27 @@
 
 ;;;;;
 ;
+; jansenVideo::SaveImage
+;
+pro jansen_recording::SaveImage, image
+
+  COMPILE_OPT IDL2, HIDDEN
+
+  path = file_search(self.directory, /expand_tilde, /expand_environment, /test_directory)
+  
+  filename = dialog_pickfile(title = 'Save Snapshot', $
+                             filter = '*.png', /fix_filter, $
+                             path = path, $
+                             file = 'jansen_snapshot', $
+                             default_extension = 'png', $
+                             /write, /overwrite_prompt, $
+                             resource_name = 'Jansen')
+  if strlen(filename) gt 0 then $
+     write_png, filename, image
+end
+
+;;;;;
+;
 ; jansen_recording_event
 ;
 ; FIXME: Implement as object-event handler
@@ -41,7 +62,7 @@ pro jansen_recording::handleEvent, event
      
      'CONTROLS': begin
         case event.value of
-           0: begin             ; start recording
+           'RECORD': begin
               case self.recording of
                  0: begin               ; ... not previous recording, so start
                     if self.hasvalidfilename() then begin
@@ -61,14 +82,19 @@ pro jansen_recording::handleEvent, event
                  else:                  ; ... already recording, carry on
               endcase
            end
-           1: self.recording *= -1 ; pause/unpause
-           2: begin                ; stop recording, close file
+           
+           'PAUSE': self.recording *= -1 ; pause/unpause
+           
+           'STOP': begin                ; stop recording, close file
               if (self.recording ne 0) then begin
                  video.unregistercallback, 'recorder'
                  self.recording = 0
                  self.recorder.close
               endif
            end
+           
+           'SNAPSHOT': self.saveimage, video.screendata
+              
            else:
         endcase
      end
@@ -146,10 +172,10 @@ pro jansen_recording::Callback, video
 
   COMPILE_OPT IDL2, HIDDEN
 
-  if (self.recording eq 1L) then begin
+  if (self.recording ge 1L) then begin
      widget_control, self.wtarget, get_value = targetnumber
      if self.framenumber lt targetnumber then begin
-        self.recorder.write, video.data
+        self.recorder.write, (self.recording eq 1L) ? video.data : video.screendata
         self.framenumber++
      endif else begin
         video.unregistercallback, 'recorder'
@@ -189,8 +215,9 @@ function jansen_recording::Init, wtop
                           VALUE = 1000UL, $
                           title = '# Frames: ', UVALUE = 'TARGET')
 
-  bvalues      = ['Record', 'Pause', 'Stop']
+  bvalues      = ['Record', 'Pause', 'Stop', 'Snapshot']
   wcontrols    = cw_bgroup(wrecording, bvalues, /ROW, $
+                           button_uvalue = strupcase(bvalues), $
                            /FRAME, /NO_RELEASE, UVALUE = 'CONTROLS')
 
   wframenumber = cw_field(wrecording, /FRAME, /NOEDIT, /ULONG, $
