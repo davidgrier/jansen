@@ -92,11 +92,13 @@ function jansen_recording::hasvalidfilename
 
   filename = self.filename
   directory = self.directory
-  
-  if filename.length eq 0 then $
+
+;  if (filename.length eq 0) then $ ; IDL 8.4
+  if strlen(filename) eq 0 then $
      return, 0
 
-  if filename.contains(path_sep()) then begin
+;  if filename.contains(path_sep()) then begin ; IDL 8.4
+  if strmatch(filename, '*'+path_sep()+'*') then begin
      directory = file_dirname(filename)
      filename = file_basename(filename)
   endif
@@ -111,7 +113,8 @@ function jansen_recording::hasvalidfilename
 
   directory = file_search(directory, /expand_tilde, /expand_environment, /mark_directory)
   
-  if ~filename.endswith('.h5', /fold_case) then $
+;  if ~filename.endswith('.h5', /fold_case) then $ ; IDL 8.4
+  if ~strmatch(filename, '*.h5', /fold_case) then $
      filename += '.h5'
   
   fullname = directory + filename

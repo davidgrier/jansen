@@ -79,6 +79,7 @@ pro jansenVideo::handleTimerEvent, id, userdata
   self.timer = timer.set(self.time, self)
   data = self.camera.read()
 
+  ;;; use filters to transform data
   self.IDLgrImage::SetProperty, data = (self.hvmmode eq 0) ? $
                                        data : $
                                        byte(128.*float(data)/self.median.get() < 255)
@@ -155,7 +156,8 @@ end
 ;
 ; jansenVideo::GetProperty
 ;
-pro jansenVideo::GetProperty, greyscale = greyscale, $
+pro jansenVideo::GetProperty, data = data, $
+                              greyscale = greyscale, $
                               camera = camera, $
                               median = median, $
                               screen = screen, $
@@ -173,6 +175,9 @@ pro jansenVideo::GetProperty, greyscale = greyscale, $
   self.camera.getproperty, _extra = re
   self.IDLgrImage::GetProperty, _extra = re
 
+  if arg_present(data) then $
+     data = self.camera.data
+  
   if arg_present(greyscale) then $
      greyscale = self.camera.greyscale
 
@@ -260,10 +265,6 @@ function jansenVideo::Init, camera = camera, $
   self.registerproperty, 'order', enum = ['Normal', 'Flipped']
   self.registerproperty, 'hvmmode', enum = ['Off', 'Running', 'Sample-Hold']
   self.registerproperty, 'hvmorder', /integer, valid_range = [0, 10, 1]
-  self.registerproperty, 'recording', $
-     enum = ['Paused', 'From Camera', 'From Screen', 'From Window']
-  self.registerproperty, 'directory', /string
-  self.registerproperty, 'filename', /string
   self.registerproperty, 'greyscale', /boolean, sensitive = 0
   self.registerproperty, 'width', /integer, sensitive = 0
   self.registerproperty, 'height', /integer, sensitive = 0
@@ -284,8 +285,7 @@ pro jansenVideo__define
             inherits IDL_Object, $
             camera: obj_new(), $
             screen: obj_new(), $
-            recording: 0L, $
-            playing: boolean(0), $
+            playing: 0L, $
             hvmmode: 0L, $
             hvmorder: 0L, $
             median: obj_new(), $
