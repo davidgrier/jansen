@@ -100,7 +100,8 @@ pro jansen, state = state
   wdata = widget_tab(wtop)
   ;; 1. video screen
   wscreentab = widget_base(wdata, title = 'Image')               ; for WIDGET_TAB
-  wscreen = widget_draw(wscreentab, graphics_level = 2, $        ; object graphics
+  wscreen = widget_draw(wscreentab, frame = 1, $
+                        graphics_level = 2, $                    ; object graphics
                         xsize = dimensions[0], $                 ; sized to fit camera
                         ysize = dimensions[1], $
                         keyboard_events = state.haskey('stage')) ; keyboard moves stage
@@ -109,13 +110,14 @@ pro jansen, state = state
   wcontrol = widget_base(wtop, /column)
   wtabs = widget_tab(wcontrol)
   wrecording = jansen_recording(wtabs)
+  wcamera = jansen_settings(wtabs, state['camera'], 'Camera')
+;  wlaser = jansen_settings(wtabs, state['imagelaser'], 'Laser')
 
   ;; 3. logo!
-;  wlogo = widget_base(wcontrol, /row)
   logo = transpose(read_png(file_dirname(routine_filepath('jansen'))+'/csmrlogosm.png'), [1, 2, 0])
 
   wlogo = widget_button(wcontrol, value = logo, /bitmap, $
-                        uvalue = 'logo', /align_right)
+                        uvalue = 'logo', /align_center)
 
   ;;; Realize widget hierarchy
   widget_control, wtop, /realize
@@ -123,7 +125,7 @@ pro jansen, state = state
 
   ;;; Graphics hierarchy
   imagemodel = IDLgrModel()
-  imagemodel.add, state.video
+  imagemodel.add, state["video"]
 
   imageview = IDLgrView(viewplane_rect = [0, 0, dimensions])
   imageview.add, imagemodel

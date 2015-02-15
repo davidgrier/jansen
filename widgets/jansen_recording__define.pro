@@ -36,8 +36,6 @@ end
 ;
 ; jansen_recording_event
 ;
-; FIXME: Implement as object-event handler
-;
 pro jansen_recording::handleEvent, event
 
   COMPILE_OPT IDL2, HIDDEN
@@ -189,7 +187,7 @@ end
 
 ;;;;;
 ;
-; jansen_recording::Init
+; jansen_recording::Init()
 ;
 ; Create the widget layout and set up the callback for the
 ; video recording object.
