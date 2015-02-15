@@ -32,22 +32,6 @@ pro jansen_recording::SaveImage, image
      write_png, filename, image
 end
 
-;;;;;
-;
-; jansen_recording::metadata()
-;
-function jansen_recording::metadata, state
-
-  COMPILE_OPT IDL2, HIDDEN
-
-  info = get_login_info()
-  meta = {creator: 'jansen', $
-          machine_name: info.machine_name, $
-          user_name: info.user_name, $
-          lambda: state.imagelaser.wavelength, $
-          mpp: state.camera.mpp}
-  return, meta
-end
 
 ;;;;;
 ;
@@ -80,10 +64,8 @@ pro jansen_recording::handleEvent, event
            'RECORD': begin
               case self.recording of
                  0: begin               ; ... not previous recording, so start
-                    if self.hasvalidfilename() then begin
-                       
-                       self.recorder = h5video(self.directory+self.filename, $
-                                               /overwrite, $
+                    if (filename = self.hasvalidfilename()) then begin
+                       self.recorder = h5video(filename, /overwrite, $
                                                metadata = self.metadata(state))
                        video.registercallback, 'recorder', self
                        self.framenumber = 0
@@ -133,7 +115,7 @@ function jansen_recording::hasvalidfilename
 
 ;  if (filename.length eq 0) then $ ; IDL 8.4
   if strlen(filename) eq 0 then $
-     return, 0
+     return, !NULL
 
 ;  if filename.contains(path_sep()) then begin ; IDL 8.4
   if strmatch(filename, '*'+path_sep()+'*') then begin
@@ -146,7 +128,7 @@ function jansen_recording::hasvalidfilename
 
   if ~file_test(directory, /directory, /write) then begin
      res = dialog_message('Cannot write to '+directory)
-     return, 0
+     return, !NULL
   endif
 
   directory = file_search(directory, /expand_tilde, /expand_environment, /mark_directory)
@@ -161,17 +143,34 @@ function jansen_recording::hasvalidfilename
      res = dialog_message(fullname + ' already exists. Overwrite?', $
                           /QUESTION, /DEFAULT_NO)
      if (res eq 'No') then $
-        return, 0
+        return, !NULL
      if ~file_test(fullname, /WRITE) then begin
         res = dialog_message('Cannot overwrite '+fullname)
-        return, 0
+        return, !NULL
      endif
   endif
 
   self.directory = directory
   self.filename = filename
 
-  return, 1
+  return, self.directory + self.filename
+end
+
+;;;;;
+;
+; jansen_recording::metadata()
+;
+function jansen_recording::metadata, state
+
+  COMPILE_OPT IDL2, HIDDEN
+
+  info = get_login_info()
+  meta = {creator: 'jansen', $
+          machine_name: info.machine_name, $
+          user_name: info.user_name, $
+          lambda: state.imagelaser.wavelength, $
+          mpp: state.camera.mpp}
+  return, meta
 end
 
 ;;;;;
