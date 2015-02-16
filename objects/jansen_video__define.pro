@@ -260,7 +260,6 @@ function jansen_video::Init, camera = camera, $
   self.registerproperty, 'description', /string
   self.registerproperty, 'playing', /boolean
   self.registerproperty, 'framerate', /float
-  self.registerproperty, 'order', enum = ['Normal', 'Flipped']
   self.registerproperty, 'hvmmode', enum = ['Off', 'Running', 'Sample-Hold']
   self.registerproperty, 'hvmorder', /integer, valid_range = [0, 10, 1]
   self.registerproperty, 'greyscale', /boolean, sensitive = 0

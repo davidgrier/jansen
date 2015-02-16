@@ -139,11 +139,16 @@ pro jansen_recording::handleEvent, event
                        self.state = 'REPLAYING'
                     endif
                  endif
-              endif
+              endif else $
+                 self.recorder.stepsize = 1
               video.playing = 1
            end
            
-           'FAST':
+           'FAST': begin
+              if (self.state eq 'REPLAYING') then begin
+                 self.recorder.stepsize *= 2
+              endif
+           end
 
            'STOP': begin
               video.playing = 0
@@ -339,6 +344,9 @@ function jansen_recording::Init, wtop
                            LABEL_LEFT = 'Replay', $
                            button_uvalue = strupcase(bvalues), $
                            /FRAME, /NO_RELEASE, UVALUE = 'REPLAY')
+  
+  ;wframeslider = widget_slider(wrecording, /FRAME, UVALUE = 'FRAMENUMBER', $
+  ;                             MINIMUM = 0, MAXIMUM = 100, SENSITIVE = 0)
 
   wframenumber = cw_field(wrecording, /FRAME, /NOEDIT, /ULONG, $
                           VALUE = 0UL, $
@@ -355,6 +363,7 @@ function jansen_recording::Init, wtop
                        /EXCLUSIVE, /NO_RELEASE, $
                        SET_VALUE = 0, UVALUE = 'HVMMODE')
 
+  self.state = 'NORMAL'
   self.wtarget = wtarget
   self.wframenumber = wframenumber
   self.framenumber = 0
