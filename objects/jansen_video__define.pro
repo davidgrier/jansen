@@ -23,11 +23,9 @@
 ;    screen     [RG ]: IDLgrWindow on which the image is drawn
 ;    framerate  [IGS]: number of frames per second
 ;    playing    [ GS]: If set, update video screen at framerate
-;    hvmmode    [ GS]: If set, video is normalized by background image
-;    background [ G ]: Background image for hvmmode
+; ;    hvmmode    [ GS]: If set, video is normalized by background image
+; ;    background [ G ]: Background image for hvmmode
 ;
-; CALLBACKS:
-;    
 ; METHODS:
 ;    GetProperty
 ;    SetProperty
@@ -46,7 +44,6 @@
 ;
 ;    UnregisterCallback, name
 ;        Remove the named callback from the list of callbacks.
-;
 ;
 ; MODIFICATION HISTORY:
 ; 02/12/2015 Written by David G. Grier, New York University
@@ -95,6 +92,32 @@ end
 
 ;;;;;
 ;
+; jansen_video::registerFilter
+;
+pro jansen_video::registerFilter, filter
+
+  COMPILE_OPT IDL2, HIDDEN
+
+  if isa(filter, 'jansen_filter') then begin
+     self.filter = filter
+     filter.source = self.camera
+  endif
+  
+end
+
+;;;;;
+;
+; jansen_video::unregisterFilter
+;
+pro jansen_video::unregisterFilter
+
+  COMPILE_OPT IDL2, HIDDEN
+
+  self.filter = self.camera
+end
+
+;;;;;
+;
 ; jansen_video::handleTimerEvent
 ;
 pro jansen_video::handleTimerEvent, id, userdata
@@ -102,17 +125,10 @@ pro jansen_video::handleTimerEvent, id, userdata
   COMPILE_OPT IDL2, HIDDEN
 
   self.timer = timer.set(self.time, self)
-  data = self.camera.read()
+  self.camera.read              ; update camera.data
 
-  ;;; use filters to transform data
-  self.IDLgrImage::SetProperty, data = (self.hvmmode eq 0) ? $
-                                       data : $
-                                       byte(128.*float(data)/self.median.get() < 255)
+  self.IDLgrImage::SetProperty, data = self.filter.data
   self.screen.draw
-
-  if (self.hvmmode eq 1) || $
-     ((self.hvmmode eq 2) && ~(self.median.initialized)) then $
-        self.median.add, data
 
   self.handleCallbacks
 end
@@ -123,16 +139,16 @@ end
 ;
 pro jansen_video::SetProperty, camera = camera, $
                                playing =  playing, $
-                               hvmmode = hvmmode, $
-                               hvmorder = hvmorder, $
                                screen = screen, $
                                framerate = framerate, $
                                _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
 
-  if obj_valid(camera) then $
+  if obj_valid(camera) then begin
      self.camera = camera
+     self.filter = camera
+  endif
   
   self.camera.setproperty, _extra = re
   self.IDLgrImage::SetProperty, _extra = re
@@ -146,12 +162,6 @@ pro jansen_video::SetProperty, camera = camera, $
      if self.playing && isa(self.screen) then $
         self.timer = timer.set(self.time, self)
   endif
-
-  if isa(hvmmode, /number, /scalar) then $
-     self.hvmmode = (long(hvmmode) > 0) < 2
-
-  if isa(hvmorder, /number, /scalar) then $
-     self.median.order = hvmorder
       
   if isa(framerate, /scalar, /number) then $
      self.time = 1./double(abs(framerate))
@@ -165,13 +175,9 @@ end
 pro jansen_video::GetProperty, data = data, $
                                screendata = screendata, $
                                camera = camera, $
-                               median = median, $
                                screen = screen, $
                                framerate = framerate, $
                                playing = playing, $
-                               hvmmode = hvmmode, $
-                               hvmorder = hvmorder, $
-                               background = background, $
                                width = width, $
                                height = height, $
                                _ref_extra = re
@@ -190,9 +196,6 @@ pro jansen_video::GetProperty, data = data, $
   if arg_present(camera) then $
      camera = self.camera
 
-  if arg_present(median) then $
-     median = self.median
-
   if arg_present(screen) then $
      screen = self.screen
 
@@ -201,15 +204,6 @@ pro jansen_video::GetProperty, data = data, $
 
   if arg_present(playing) then $
      playing = self.playing
-
-  if arg_present(hvmmode) then $
-     hvmmode = self.hvmmode
-
-  if arg_present(hvmorder) then $
-     hvmorder = self.median.order
-
-  if arg_present(background) then $
-     background = self.median.get()
 
   if arg_present(width) then $
      width = (self.camera.dimensions)[0]
@@ -236,14 +230,14 @@ end
 function jansen_video::Init, camera = camera, $
                              screen = screen, $
                              framerate = framerate, $
-                             hvmorder = hvmorder, $
                              _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
 
-  if isa(camera, 'fabcamera') then $
-     self.camera = camera $
-  else $
+  if isa(camera, 'fabcamera') then begin
+     self.camera = camera
+     self.filter = camera
+  endif else $
      return, 0B
 
   imagedata = self.camera.read()
@@ -253,9 +247,6 @@ function jansen_video::Init, camera = camera, $
 
   if ~self.IDLgrImage::Init(imagedata, _extra = re) then $
      return, 0B
-
-  order = isa(hvmorder, /number, /scalar) ? (hvmorder > 0) < 10 : 3
-  self.median = numedian(order = order, data = imagedata)
 
   self.time = (isa(framerate, /scalar, /number)) ? $
               1./double(abs(framerate)) : 1./29.97D
@@ -268,8 +259,6 @@ function jansen_video::Init, camera = camera, $
   self.registerproperty, 'description', /string
   self.registerproperty, 'playing', /boolean
   self.registerproperty, 'framerate', /float
-  self.registerproperty, 'hvmmode', enum = ['Off', 'Running', 'Sample-Hold']
-  self.registerproperty, 'hvmorder', /integer, valid_range = [0, 10, 1]
   self.registerproperty, 'width', /integer, sensitive = 0
   self.registerproperty, 'height', /integer, sensitive = 0
 
@@ -290,13 +279,9 @@ pro jansen_video__define
             camera: obj_new(), $
             screen: obj_new(), $
             playing: 0L, $
-            hvmmode: 0L, $
-            hvmorder: 0L, $
-            median: obj_new(), $
-            bgcounter: 0L, $
             time: 0.D, $
             timer: 0L, $
-            callback: obj_new(), $
+            filter: obj_new(), $
             callbacks: obj_new() $
            }
 end

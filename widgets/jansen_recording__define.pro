@@ -50,8 +50,10 @@ pro jansen_recording::handleEvent, event
      'NAME': begin
         filename = self.filename
         self.filename = event.value
-        if ~self.hasvalidfilename() then $
-           self.filename = filename
+        if ~self.hasvalidfilename() then begin
+           if ~self.hasvalidfilename(/read) then $
+              self.filename = filename
+        endif
         widget_control, event.id, set_value = self.filename
      end
      
@@ -109,6 +111,8 @@ pro jansen_recording::handleEvent, event
            'REWIND': begin
               if (self.state eq 'REPLAYING') then begin
                  self.recorder.index = 0
+                 video.playing = 0
+                 self.callback, video
               endif
            end
            
@@ -147,6 +151,7 @@ pro jansen_recording::handleEvent, event
            'FAST': begin
               if (self.state eq 'REPLAYING') then begin
                  self.recorder.stepsize *= 2
+                 video.playing = 1
               endif
            end
 
@@ -167,7 +172,11 @@ pro jansen_recording::handleEvent, event
      end
      
      'HVMMODE': begin
-        video.hvmmode = event.value
+        case event.value of
+           0: video.unregisterfilter
+           1: video.registerfilter, jansen_filter_median(/running, order = 4)
+           2: video.registerfilter, jansen_filter_median(order = 4)
+        endcase
      end
      
      else: print, 'got', uval
@@ -190,7 +199,7 @@ function jansen_recording::hasvalidfilename, read = read
 
 ;  if (filename.length eq 0) then $ ; IDL 8.4
   if strlen(filename) eq 0 then $
-     return, !NULL
+     return, 0
 
 ;  if filename.contains(path_sep()) then begin ; IDL 8.4
   if strmatch(filename, '*'+path_sep()+'*') then begin
@@ -205,12 +214,12 @@ function jansen_recording::hasvalidfilename, read = read
 
      if ~file_test(directory, /directory, /write) then begin
         res = dialog_message('Cannot write to '+directory)
-        return, !NULL
+        return, 0
      endif
   endif else begin
      if ~file_test(directory, /directory, /read) then begin
         res = dialog_message('Cannot read from '+directory)
-        return, !NULL
+        return, 0
      endif
   endelse
 
@@ -228,16 +237,16 @@ function jansen_recording::hasvalidfilename, read = read
         res = dialog_message(fullname + ' already exists. Overwrite?', $
                              /question, /default_no)
         if (res eq 'No') then $
-           return, !NULL
+           return, 0
         if ~file_test(fullname, /write) then begin
            res = dialog_message('Cannot overwrite '+fullname)
-           return, !NULL
+           return, 0
         endif
      endif
   endif else begin
      if ~file_test(fullname) then begin
         res = dialog_message('Cannot read '+fullname)
-        return, !NULL
+        return, 0
      endif
   endelse
 
