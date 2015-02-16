@@ -122,7 +122,6 @@ end
 ; jansen_video::SetProperty
 ;
 pro jansen_video::SetProperty, camera = camera, $
-                               greyscale = greyscale, $
                                playing =  playing, $
                                hvmmode = hvmmode, $
                                hvmorder = hvmorder, $
@@ -135,7 +134,6 @@ pro jansen_video::SetProperty, camera = camera, $
   if obj_valid(camera) then $
      self.camera = camera
   
-;  self.camera.setproperty, greyscale = greyscale, _extra = re
   self.camera.setproperty, _extra = re
   self.IDLgrImage::SetProperty, _extra = re
 
@@ -166,7 +164,6 @@ end
 ;
 pro jansen_video::GetProperty, data = data, $
                                screendata = screendata, $
-                               greyscale = greyscale, $
                                camera = camera, $
                                median = median, $
                                screen = screen, $
@@ -190,9 +187,6 @@ pro jansen_video::GetProperty, data = data, $
   if arg_present(screendata) then $
      self.IDLgrImage::GetProperty, data = screendata
   
-  if arg_present(greyscale) then $
-     greyscale = self.camera.greyscale
-
   if arg_present(camera) then $
      camera = self.camera
 
@@ -276,7 +270,6 @@ function jansen_video::Init, camera = camera, $
   self.registerproperty, 'framerate', /float
   self.registerproperty, 'hvmmode', enum = ['Off', 'Running', 'Sample-Hold']
   self.registerproperty, 'hvmorder', /integer, valid_range = [0, 10, 1]
-  self.registerproperty, 'greyscale', /boolean, sensitive = 0
   self.registerproperty, 'width', /integer, sensitive = 0
   self.registerproperty, 'height', /integer, sensitive = 0
 
