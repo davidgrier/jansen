@@ -7,9 +7,9 @@
 ;    requests an image from an attached camera and displays that image
 ;    on an attached screen.
 ;
-;    It optionally runs the image through a filter before displaying.
+;    Optionally runs the image through a filter before displaying.
 ;
-;    It maintains a list of callback functions that are called every
+;    Maintains a list of callback functions that are called every
 ;    time an image is acquired.
 ;
 ; INHERITS:
@@ -28,9 +28,25 @@
 ;
 ; CALLBACKS:
 ;    
-; METHODS
+; METHODS:
 ;    GetProperty
 ;    SetProperty
+;
+;    RegisterCallback, name, object
+;        Register a callback method that will be called each time
+;        an image is acquired.
+;        INPUTS:
+;            NAME: A string containing the name by which the callback
+;                will be referred.
+;            OBJECT: Object reference to the object that will handle
+;                the callback.  The object must implement the
+;                OBJECT::CALLBACK, obj
+;                method, taking the jansen_video object as its
+;                argument.
+;
+;    UnregisterCallback, name
+;        Remove the named callback from the list of callbacks.
+;
 ;
 ; MODIFICATION HISTORY:
 ; 02/12/2015 Written by David G. Grier, New York University
@@ -100,8 +116,6 @@ pro jansen_video::handleTimerEvent, id, userdata
 
   self.handleCallbacks
 end
-
-
 
 ;;;;;
 ;
