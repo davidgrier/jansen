@@ -234,18 +234,18 @@ function jansen_recording::hasvalidfilename, read = read
   ;; Check that file can be written, or read, as needed
   if write_flag then begin
      if file_test(fullname) then begin
-        res = dialog_message(fullname + ' already exists. Overwrite?', $
-                             /question, /default_no)
+        res = dialog_message([fullname + ' already exists.', 'Overwrite?'], $
+                             /question, /default_no, /center)
         if (res eq 'No') then $
            return, 0
         if ~file_test(fullname, /write) then begin
-           res = dialog_message('Cannot overwrite '+fullname)
+           res = dialog_message('Cannot overwrite '+fullname, /center)
            return, 0
         endif
      endif
   endif else begin
      if ~file_test(fullname) then begin
-        res = dialog_message('Cannot read '+fullname)
+        res = dialog_message('Cannot read '+fullname, /center)
         return, 0
      endif
   endelse
