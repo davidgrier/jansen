@@ -69,7 +69,7 @@ pro jansen_recording::handleEvent, event
                                                metadata = self.metadata(state))
                        if isa(self.recorder, 'h5video') then begin
                           video.registercallback, 'recorder', self
-                          self.framenumber = 0
+                          self.frn = 0
                           self.state = 'RECORDING'
                        endif
                     endif
@@ -298,19 +298,19 @@ pro jansen_recording::Callback, video
   COMPILE_OPT IDL2, HIDDEN
 
   if (self.state eq 'RECORDING') then begin
-     widget_control, self.wtarget, get_value = targetnumber
-     if self.framenumber lt targetnumber then begin
+     widget_control, self.wtgt, get_value = target
+     if self.frn lt target then begin
         self.recorder.write, video.data ; (self.state eq 'RECORDING') ? video.data : video.screendata
-        self.framenumber++
+        self.frn++
      endif else begin
         video.unregistercallback, 'recorder'
         self.state = 'NORMAL'
         self.recorder.close
-        self.framenumber = 0
+        self.frn = 0
      endelse
-     widget_control, self.wframenumber, set_value = self.framenumber     
+     widget_control, self.wfrn, set_value = self.frn     
   endif else if (self.state eq 'REPLAYING') then begin
-     widget_control, self.wframenumber, set_value = self.recorder.index
+     widget_control, self.wfrn, set_value = self.recorder.index
   endif
 end
 
@@ -334,48 +334,48 @@ function jansen_recording::Init, wtop
                            EVENT_PRO = 'jansen_object_event', $ ; same event dispatcher for all object widgets
                            RESOURCE_NAME = 'Jansen')
 
-  wname        = cw_field(wrecording, /FRAME, /RETURN_EVENTS, $
-                          VALUE = self.filename, $
-                          title = 'File Name:', UVALUE = 'NAME')
+  void = cw_field(wrecording, /FRAME, /RETURN_EVENTS, $
+                  VALUE = self.filename, $
+                  title = 'File Name:', UVALUE = 'NAME')
   
-  wtarget      = cw_field(wrecording, /FRAME, /RETURN_EVENTS, /ULONG, $
-                          VALUE = 1000UL, $
-                          title = '# Frames: ', UVALUE = 'TARGET')
+  wtgt = cw_field(wrecording, /FRAME, /RETURN_EVENTS, /ULONG, $
+                  VALUE = 1000UL, $
+                  title = '# Frames: ', UVALUE = 'TARGET')
 
-  bvalues      = ['Record', 'Pause', 'Stop', 'Snapshot']
-  wrecord      = cw_bgroup(wrecording, bvalues, /ROW, $
-                           LABEL_LEFT = 'Record', $
-                           button_uvalue = strupcase(bvalues), $
-                           /FRAME, /NO_RELEASE, UVALUE = 'RECORD')
+  bvalues = ['Record', 'Pause', 'Stop', 'Snapshot']
+  void = cw_bgroup(wrecording, bvalues, /ROW, $
+                   LABEL_LEFT = 'Record', $
+                   button_uvalue = strupcase(bvalues), $
+                   /FRAME, /NO_RELEASE, UVALUE = 'RECORD')
 
-  bvalues      = ['Rewind', 'Pause', 'Play', 'Fast', 'Stop']
-  wreplay      = cw_bgroup(wrecording, bvalues, /ROW, $
-                           LABEL_LEFT = 'Replay', $
-                           button_uvalue = strupcase(bvalues), $
-                           /FRAME, /NO_RELEASE, UVALUE = 'REPLAY')
+  bvalues = ['Rewind', 'Pause', 'Play', 'Fast', 'Stop']
+  void = cw_bgroup(wrecording, bvalues, /ROW, $
+                   LABEL_LEFT = 'Replay', $
+                   button_uvalue = strupcase(bvalues), $
+                   /FRAME, /NO_RELEASE, UVALUE = 'REPLAY')
   
   ;wframeslider = widget_slider(wrecording, /FRAME, UVALUE = 'FRAMENUMBER', $
   ;                             MINIMUM = 0, MAXIMUM = 100, SENSITIVE = 0)
 
-  wframenumber = cw_field(wrecording, /FRAME, /NOEDIT, /ULONG, $
-                          VALUE = 0UL, $
-                          title = 'Frame #:  ')
+  wfrn = cw_field(wrecording, /FRAME, /NOEDIT, /ULONG, $
+                  VALUE = 0UL, $
+                  title = 'Frame #:  ')
   
-  wfeatures    = cw_field(wrecording, /FRAME, /NOEDIT, /ULONG, $
-                          VALUE = 0UL, $
-                          title = 'Feature #:')
+  wftn = cw_field(wrecording, /FRAME, /NOEDIT, /ULONG, $
+                  VALUE = 0UL, $
+                  title = 'Feature #:')
 
   bvalues = ['Normal', 'Running', 'Sample/Hold']
-  whvmmode = cw_bgroup(wrecording, bvalues, $
-                       /ROW, /FRAME, $
-                       LABEL_LEFT = 'Mode', $
-                       /EXCLUSIVE, /NO_RELEASE, $
-                       SET_VALUE = 0, UVALUE = 'HVMMODE')
+  void = cw_bgroup(wrecording, bvalues, $
+                   /ROW, /FRAME, $
+                   LABEL_LEFT = 'Mode', $
+                   /EXCLUSIVE, /NO_RELEASE, $
+                   SET_VALUE = 0, UVALUE = 'HVMMODE')
 
   self.state = 'NORMAL'
-  self.wtarget = wtarget
-  self.wframenumber = wframenumber
-  self.framenumber = 0
+  self.wtgt = wtgt
+  self.wfrn = wfrn
+  self.frn = 0
 
   return, 1
 end
@@ -393,9 +393,9 @@ pro jansen_recording__define
             recorder: obj_new(), $
             directory: '', $
             filename: '', $            
-            wtarget: 0L, $
-            framenumber: 0UL, $
-            wframenumber: 0L $
+            wtgt: 0L, $
+            frn: 0UL, $
+            wfrn: 0L $
            }
 end
 
