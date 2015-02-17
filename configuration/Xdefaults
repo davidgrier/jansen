@@ -1,0 +1,28 @@
+!----
+! Xdefaults
+!
+! Sample Xdefaults file for Jansen HVM system
+!
+! Save as ~/.Xdefaults
+!
+! MODIFICATION HISTORY
+! 02/15/2015 Written by David G. Grier, New York University
+!----
+
+!---- All widgets
+Idl*background:grey90
+
+!---- For Widget_Propertysheet
+Idl*JansenProperty*XmLabel*background: lightyellow
+
+!---- For text widgets
+Idl*XmText*background: lightyellow
+Idl*XmText*highlightThickness: 5
+
+!---- For Dialog_Pickfile
+Idl*XmFileSelectionBox.width: 600
+Idl*XmFileSelectionBox.height: 600
+Idl*XmFileSelectionBox*XmList*background: lightyellow
+Idl*XmFileSelectionBox*XmList*HighlightColor: wheat
+Idl*XmFileSelectionBox*XmTextField*background: lightyellow
+Idl*XmFileSelectionBox*XmTextField*HighlightColor: wheat
