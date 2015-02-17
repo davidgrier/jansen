@@ -384,7 +384,7 @@ end
 ;
 ; jansen_recording__define
 ;
-pro jansen_recording__define, wtop
+pro jansen_recording__define
 
   COMPILE_OPT IDL2, HIDDEN
 

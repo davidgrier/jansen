@@ -96,24 +96,34 @@ pro jansen, state = state
   ;; menu bar
   jansen_menu, bar
 
-  ;; data displays
+  ;; Data displays
   wdata = widget_tab(wtop)
-  ;; 1. video screen
+  ;; 1.(a) video screen
   wscreentab = widget_base(wdata, title = 'Image')               ; for WIDGET_TAB
   wscreen = widget_draw(wscreentab, frame = 1, $
                         graphics_level = 2, $                    ; object graphics
                         xsize = dimensions[0], $                 ; sized to fit camera
                         ysize = dimensions[1], $
                         keyboard_events = state.haskey('stage')) ; keyboard moves stage
+  
+  ;; 1.(b) live results?
 
   ;; 2. control panel(s)
   wcontrol = widget_base(wtop, /column)
   wtabs = widget_tab(wcontrol)
   wrecording = jansen_recording(wtabs)
   wcamera = jansen_settings(wtabs, state['camera'], 'Camera')
-;  wlaser = jansen_settings(wtabs, state['imagelaser'], 'Laser')
-
-  ;; 3. logo!
+  ;; FIXME: place multiple objects on one tab:
+  ;;     Perhaps argument can be an array of objects
+  ;; FIXME: add functionality
+  ;;  wlaser = jansen_settings(wtabs, state['imagelaser'], 'Laser')
+  ;;  wstage = jansen_settings(wtabs, state['stage'], 'Stage')
+  
+  ;; 3. Global information
+  ;;    wavelength, mpp, temperature
+  winfo = jansen_info(wcontrol, state)
+  
+  ;; 4. logo!
   logo = transpose(read_png(file_dirname(routine_filepath('jansen'))+'/csmrlogosm.png'), [1, 2, 0])
   wlogo = widget_button(wcontrol, value = logo, /bitmap, $
                         uvalue = 'logo', /align_center)
