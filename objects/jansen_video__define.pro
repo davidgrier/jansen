@@ -23,8 +23,6 @@
 ;    screen     [RG ]: IDLgrWindow on which the image is drawn
 ;    framerate  [IGS]: number of frames per second
 ;    playing    [ GS]: If set, update video screen at framerate
-; ;    hvmmode    [ GS]: If set, video is normalized by background image
-; ;    background [ G ]: Background image for hvmmode
 ;
 ; METHODS:
 ;    GetProperty
