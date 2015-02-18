@@ -267,9 +267,9 @@ function jansen_recording::metadata, state
   info = get_login_info()
 
   camera = state['camera']
-  exposure = (camera.hasproperty('exposure')) ? $
-             camera.exposure : $
-             'unknown'
+  exposure_time = (camera.hasproperty('exposure_time')) ? $
+                  camera.exposure_time : $
+                  'unknown'
 
   gain = (camera.hasproperty('gain')) ? $
          camera.gain : $
@@ -279,7 +279,7 @@ function jansen_recording::metadata, state
               machine_name:  info.machine_name, $
               user_name:     info.user_name, $
               camera:        camera.name, $
-              exposure_time: exposure, $
+              exposure_time: exposure_time, $
               gain:          gain, $
               lambda:        state.imagelaser.wavelength, $
               mpp:           camera.mpp}
