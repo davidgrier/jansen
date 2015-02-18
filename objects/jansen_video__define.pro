@@ -21,8 +21,8 @@
 ;    width      [ G ]: width of camera image
 ;    height     [ G ]: height of camera image
 ;    screen     [RG ]: IDLgrWindow on which the image is drawn
-;    framerate  [IGS]: number of frames per second
-;    playing    [ GS]: If set, update video screen at framerate
+;    frame_rate [IGS]: number of frames per second
+;    playing    [ GS]: If set, update video screen at frame_rate
 ;
 ; METHODS:
 ;    GetProperty
@@ -138,7 +138,7 @@ end
 pro jansen_video::SetProperty, camera = camera, $
                                playing =  playing, $
                                screen = screen, $
-                               framerate = framerate, $
+                               frame_rate = frame_rate, $
                                _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
@@ -161,8 +161,8 @@ pro jansen_video::SetProperty, camera = camera, $
         self.timer = timer.set(self.time, self)
   endif
       
-  if isa(framerate, /scalar, /number) then $
-     self.time = 1./double(abs(framerate))
+  if isa(frame_rate, /scalar, /number) then $
+     self.time = 1./double(abs(frame_rate))
 
 end
 
@@ -174,7 +174,7 @@ pro jansen_video::GetProperty, data = data, $
                                screendata = screendata, $
                                camera = camera, $
                                screen = screen, $
-                               framerate = framerate, $
+                               frame_rate = frame_rate, $
                                playing = playing, $
                                width = width, $
                                height = height, $
@@ -197,8 +197,8 @@ pro jansen_video::GetProperty, data = data, $
   if arg_present(screen) then $
      screen = self.screen
 
-  if arg_present(framerate) then $
-     framerate = 1./self.time
+  if arg_present(frame_rate) then $
+     frame_rate = 1./self.time
 
   if arg_present(playing) then $
      playing = self.playing
@@ -227,7 +227,7 @@ end
 ;
 function jansen_video::Init, camera = camera, $
                              screen = screen, $
-                             framerate = framerate, $
+                             frame_rate = frame_rate, $
                              _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
@@ -246,8 +246,8 @@ function jansen_video::Init, camera = camera, $
   if ~self.IDLgrImage::Init(imagedata, _extra = re) then $
      return, 0B
 
-  self.time = (isa(framerate, /scalar, /number)) ? $
-              1./double(abs(framerate)) : 1./29.97D
+  self.time = (isa(frame_rate, /scalar, /number)) ? $
+              1./double(abs(frame_rate)) : 1./29.97D
 
   self.callbacks = hash()
 
@@ -256,7 +256,7 @@ function jansen_video::Init, camera = camera, $
   self.registerproperty, 'name', /string, /hide
   self.registerproperty, 'description', /string
   self.registerproperty, 'playing', /boolean
-  self.registerproperty, 'framerate', /float
+  self.registerproperty, 'frame_rate', /float
   self.registerproperty, 'width', /integer, sensitive = 0
   self.registerproperty, 'height', /integer, sensitive = 0
 

@@ -22,12 +22,12 @@ function jansen_configure_video, configuration
   if configuration.haskey('video_order') then $
      order = long(configuration['video_order'])
   
-  if configuration.haskey('video_framerate') then $
-     if execute('a = '+configuration['video_framerate'], 1, 1) then $
-        framerate = a
+  if configuration.haskey('video_frame_rate') then $
+     if execute('a = '+configuration['video_frame_rate'], 1, 1) then $
+        frame_rate = a
 
   video = jansen_video(camera = camera, order = order, $
-                       framerate = framerate)
+                       frame_rate = frame_rate)
 
   if ~isa(video, 'jansen_video') then $
      configuration['error'] = 'could not initialize video system'
