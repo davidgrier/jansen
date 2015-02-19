@@ -232,7 +232,7 @@ function jansen_video::Init, camera = camera, $
 
   COMPILE_OPT IDL2, HIDDEN
 
-  if isa(camera, 'fabcamera') then begin
+  if isa(camera, 'jansen_camera') then begin
      self.camera = camera
      self.filter = camera
   endif else $
