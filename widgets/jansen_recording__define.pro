@@ -382,14 +382,10 @@ function jansen_recording::Init, wtop, configuration, title
 
   COMPILE_OPT IDL2, HIDDEN
 
-  self.title = title
   self.directory = isa(configuration.directory, /string) ? configuration.directory : '~/data'
   self.filename = isa(configuration.filename, /string) ? configuration.filename : 'jansen.h5'
-  
-  if ~self.Jansen_Widget::Init(wtop) then $
-     return, 0B
-
-  return, 1B
+  self.title = title
+  return, self.Jansen_Widget::Init(wtop) 
 end
 
 ;;;;;

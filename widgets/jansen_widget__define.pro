@@ -107,6 +107,8 @@ function jansen_widget::Init, wtop
   COMPILE_OPT IDL2, HIDDEN
 
   self.name = isa(name, /string) ? name[0] : obj_class(self)
+  if isa(title, /string) then $
+     self.title = title
   self.create, wtop
   widget_control, self.widget_id, set_uvalue = self
   widget_control, self.widget_id, event_pro = 'jansen_object_event'
