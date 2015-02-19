@@ -112,7 +112,7 @@ pro jansen, state = state
   ;; 2. control panel(s)
   wcontrol = widget_base(wtop, /column)
   wtabs = widget_tab(wcontrol)
-  wrecording = jansen_recording(wtabs)
+  wrecording = jansen_recording(wtabs, state['recording'], 'Recording')
   wcamera = jansen_settings(wtabs, state['camera'], 'Camera')
   ;; FIXME: place multiple objects on one tab:
   ;;     Perhaps argument can be an array of objects

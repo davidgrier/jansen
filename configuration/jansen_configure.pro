@@ -45,9 +45,10 @@ function jansen_configure
   ;;; Apply configuration information to jansen subsystems
   components = list('error')
   components.add, jansen_configure_camera(configuration)
+  components.add, jansen_configure_video(configuration)
+  components.add, jansen_configure_recording(configuration)
   components.add, nuconf_imagelaser(configuration)
   components.add, nuconf_stage(configuration)
-  components.add, jansen_configure_video(configuration)
 
   ;;; Incorporate configuration information into jansen state
   state = dictionary()

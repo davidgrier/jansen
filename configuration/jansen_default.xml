@@ -4,15 +4,18 @@
 	  greyscale="1">
   </camera>
 
+  <video frame_rate="29.97">
+  </video>
+
+  <recording directory="~/data"
+	     filename="jansen.h5">
+  </recording>
+  
   <imagelaser object="fablaser_fake"
               wavelength="0.447"
               emission="0">
   </imagelaser>
 
   <stage object="fabstage_fake">
-  </stage>
-
-  <video directory="~/data">
-  </video>
-
+  </stage>  
 </configuration>

@@ -323,7 +323,7 @@ pro jansen_recording::Create, wtop
   COMPILE_OPT IDL2, HIDDEN
   
   wrecording = widget_base(wtop, /COLUMN, /GRID_LAYOUT, $
-                           TITLE = 'Recording', $               ; for WIDGET_TAB
+                           TITLE = self.title, $               ; for WIDGET_TAB
                            RESOURCE_NAME = 'Jansen')
 
   void = cw_field(wrecording, /FRAME, /RETURN_EVENTS, $
@@ -378,12 +378,13 @@ end
 ; Create the widget layout and set up the callback for the
 ; video recording object.
 ;
-function jansen_recording::Init, wtop, directory, filename
+function jansen_recording::Init, wtop, configuration, title
 
   COMPILE_OPT IDL2, HIDDEN
 
-  self.directory = isa(directory, /string) ? directory[0] : '~/data'
-  self.filename = isa(filename, /string) ? filename[0] : 'jansen.h5'
+  self.title = title
+  self.directory = isa(configuration.directory, /string) ? configuration.directory : '~/data'
+  self.filename = isa(configuration.filename, /string) ? configuration.filename : 'jansen.h5'
   
   if ~self.Jansen_Widget::Init(wtop) then $
      return, 0B
@@ -401,6 +402,7 @@ pro jansen_recording__define
 
   struct = {Jansen_Recording, $
             inherits Jansen_Widget, $
+            title: '', $
             state: '', $        ; 'paused', 'recording', 'replaying'
             recorder: obj_new(), $
             directory: '', $
