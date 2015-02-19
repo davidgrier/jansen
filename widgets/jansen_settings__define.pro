@@ -37,7 +37,7 @@ pro jansen_settings::Create, wtop
   wid = widget_base(wtop, /COLUMN, /GRID_LAYOUT, $
                     TITLE = self.title, $
                     RESOURCE_NAME = 'JansenProperty')
-  void = widget_propertysheet(wid, value = object, /frame)
+  void = widget_propertysheet(wid, value = self.object, /frame)
   self.widget_id = wid
 end
 

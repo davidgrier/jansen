@@ -98,17 +98,22 @@ pro jansen, state = state
   jansen_menu, bar
 
   ;; Data displays
-  wdata = widget_tab(wtop)
+  wdatatabs = widget_tab(wtop)
   ;; 1.(a) video screen
-  wscreentab = widget_base(wdata, title = 'Image')               ; for WIDGET_TAB
+  wscreentab = widget_base(wdatatabs, title = 'Image')               ; for WIDGET_TAB
   wscreen = widget_draw(wscreentab, frame = 1, $
                         graphics_level = 2, $                    ; object graphics
                         xsize = dimensions[0], $                 ; sized to fit camera
                         ysize = dimensions[1], $
                         keyboard_events = state.haskey('stage')) ; keyboard moves stage
-  
-  ;; 1.(b) live results?
 
+  ;; 1.(b) live results?
+  wdatatab = widget_base(wdatatabs, title = 'Data')
+  wplot = widget_draw(wdatatab, frame = 1, $
+                      graphics_level = 2, $
+                      xsize = dimensions[0], $
+                      ysize = dimensions[1])
+  
   ;; 2. control panel(s)
   wcontrol = widget_base(wtop, /column)
   wtabs = widget_tab(wcontrol)
@@ -125,13 +130,13 @@ pro jansen, state = state
   winfo = jansen_info(wcontrol, state)
 
   ;; 4. logo!
-  area = winfo.scr_size
-  area[1] = 50
+  area = [winfo.scr_size[0], 50]
   wlogo = jansen_logo(wcontrol, 'csmrlogo.png', area)
 
   ;;; Realize widget hierarchy
   widget_control, wtop, /realize
   widget_control, wscreen, get_value = screen
+  widget_control, wplot, get_value = plot
 
   ;;; Graphics hierarchy
   imagemodel = IDLgrModel()
@@ -148,6 +153,7 @@ pro jansen, state = state
 
   ;;; Current state of the system
   state['screen'] = screen
+  state['plot'] = plot
   widget_control, wtop, set_uvalue = state
 
   ;;; Start event loop
