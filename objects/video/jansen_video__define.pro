@@ -251,7 +251,7 @@ function jansen_video::Init, camera = camera, $
 
   self.callbacks = hash()
 
-  self.name = 'jansenvideo '
+  self.name = 'jansen_video '
   self.description = 'Video Image '
   self.registerproperty, 'name', /string, /hide
   self.registerproperty, 'description', /string

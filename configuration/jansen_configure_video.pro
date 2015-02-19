@@ -3,7 +3,7 @@
 ;    jansen_configure_video()
 ;
 ; Options:
-; CAMERA:     reference to fabcamera object that will provide images
+; CAMERA:     reference to jansen_camera object that will provide images
 ; ORDER:      flag: set to flip image vertically
 ; FRAMERATE:  number of images per second
 ;
@@ -16,8 +16,10 @@ function jansen_configure_video, configuration
 
   COMPILE_OPT IDL2, HIDDEN
 
-  if configuration.haskey('camera') then $
+  if configuration.haskey('camera') then begin
+     help, camera
      camera = configuration['camera']
+  endif
   
   if configuration.haskey('video_order') then $
      order = long(configuration['video_order'])
