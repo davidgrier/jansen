@@ -27,14 +27,14 @@ function jansen_configure
      return, dictionary('error', 'could not initialize configuration parser')
 
   default_configuration = 'jansen_default.xml'
-  fn = file_search(fab_path(), default_configuration, count = count)
-  if (count le 0) then $
+  if ~(fn = jansen_search(default_configuration)) then $
      return, dictionary('error', $
                         'could not open default configuration file: ' + $
                         default_configuration)
-  parser.parsefile, fn[0]
+  parser.parsefile, fn
 
-  filenames = file_search('~/.jansen/*.xml', /test_read, count = count)
+  local_configuration = '~/.jansen/*.xml'
+  filenames = file_search(local_configuration, /test_read, count = count)
   if (count gt 0) then $
      foreach filename, filenames do $
         parser.parsefile, filename

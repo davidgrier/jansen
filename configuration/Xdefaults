@@ -3,7 +3,8 @@
 !
 ! Sample Xdefaults file for Jansen HVM system
 !
-! Save as ~/.Xdefaults
+! Save as ~/.Xdefaults on MacOS and
+;         ~/.Xresources on Ubuntu
 !
 ! MODIFICATION HISTORY
 ! 02/15/2015 Written by David G. Grier, New York University
