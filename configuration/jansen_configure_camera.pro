@@ -17,34 +17,34 @@
 ;-
 function jansen_configure_camera, configuration
 
-COMPILE_OPT IDL2, HIDDEN
+  COMPILE_OPT IDL2, HIDDEN
 
-camera_object = (configuration.haskey('camera_object')) ? $
-                configuration['camera_object'] : 'fabcamera'
+  camera_object = (configuration.haskey('camera_object')) ? $
+                  configuration['camera_object'] : 'fabcamera'
 
-greyscale = (configuration.haskey('camera_greyscale')) ? $
-            configuration['camera_greyscale'] eq '1' : 1
+  greyscale = (configuration.haskey('camera_greyscale')) ? $
+              configuration['camera_greyscale'] eq '1' : 1
 
-if configuration.haskey('camera_order') then $
-   order = long(configuration['camera_order'])
+  if configuration.haskey('camera_order') then $
+     order = long(configuration['camera_order'])
 
-if configuration.haskey('camera_hflip') then $
-   hflip = long(configuration['camera_hflip'])
+  if configuration.haskey('camera_hflip') then $
+     hflip = long(configuration['camera_hflip'])
 
-mpp = (configuration.haskey('camera_mpp')) ? $
-      float(configuration['camera_mpp']) : 0.
+  mpp = (configuration.haskey('camera_mpp')) ? $
+        float(configuration['camera_mpp']) : 0.
 
-if configuration.haskey('camera_dimensions') then $
-   if execute('a = '+configuration['camera_dimensions'], 1, 1) then $
-      dimensions = a
+  if configuration.haskey('camera_dimensions') then $
+     if execute('a = '+configuration['camera_dimensions'], 1, 1) then $
+        dimensions = a
 
-camera = obj_new(camera_object, greyscale = greyscale, $
-                 order = order, hflip = hflip, $
-                 dimensions = dimensions, mpp = mpp)
+  camera = obj_new(camera_object, greyscale = greyscale, $
+                   order = order, hflip = hflip, $
+                   dimensions = dimensions, mpp = mpp)
 
-if ~isa(camera, 'jansen_camera') then $
-   configuration['error'] = 'could not initialize camera'
+  if ~isa(camera, 'jansen_camera') then $
+     configuration['error'] = 'could not initialize camera'
 
-configuration['camera'] = camera
-return, 'camera'
+  configuration['camera'] = camera
+  return, 'camera'
 end

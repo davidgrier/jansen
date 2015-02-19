@@ -92,7 +92,7 @@ pro jansen, state = state
 
   ;;; Widget layout
   wtop = widget_base(/row, title = 'Jansen', mbar = bar, tlb_frame_attr = 5, $
-                     bitmap = 'jansen_logo.ico')
+                     bitmap = jansen_search('jansen_logo.ico'))
 
   ;; menu bar
   jansen_menu, bar
@@ -125,7 +125,7 @@ pro jansen, state = state
   winfo = jansen_info(wcontrol, state)
   
   ;; 4. logo!
-  logo = transpose(read_png(file_dirname(routine_filepath('jansen'))+'/csmrlogosm.png'), [1, 2, 0])
+  logo = transpose(read_png(jansen_search('csmrlogosm.png')), [1, 2, 0])
   wlogo = widget_button(wcontrol, value = logo, /bitmap, $
                         uvalue = 'logo', /align_center)
 

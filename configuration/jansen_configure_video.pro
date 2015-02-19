@@ -16,10 +16,8 @@ function jansen_configure_video, configuration
 
   COMPILE_OPT IDL2, HIDDEN
 
-  if configuration.haskey('camera') then begin
-     help, camera
+  if configuration.haskey('camera') then $
      camera = configuration['camera']
-  endif
   
   if configuration.haskey('video_order') then $
      order = long(configuration['video_order'])
