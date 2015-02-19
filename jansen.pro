@@ -125,7 +125,9 @@ pro jansen, state = state
   winfo = jansen_info(wcontrol, state)
 
   ;; 4. logo!
-  wlogo = jansen_logo(wcontrol, 'csmrlogo.png', winfo.size)
+  area = winfo.scr_size
+  area[1] = 50
+  wlogo = jansen_logo(wcontrol, 'csmrlogo.png', area)
 
   ;;; Realize widget hierarchy
   widget_control, wtop, /realize
