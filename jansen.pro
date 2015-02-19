@@ -123,10 +123,9 @@ pro jansen, state = state
   ;; 3. Global information
   ;;    wavelength, mpp, temperature
   winfo = jansen_info(wcontrol, state)
-  
+
   ;; 4. logo!
-  logo = transpose(read_png(jansen_search('csmrlogo.png')), [1, 2, 0])
-  wlogo = widget_button(wcontrol, value = logo, /bitmap, uvalue = 'logo', /align_center)
+  wlogo = jansen_logo(wcontrol, 'csmrlogo.png', winfo.size)
 
   ;;; Realize widget hierarchy
   widget_control, wtop, /realize

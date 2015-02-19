@@ -316,22 +316,14 @@ end
 
 ;;;;;
 ;
-; jansen_recording::Init()
+; jansen_recording::Create
 ;
-; Create the widget layout and set up the callback for the
-; video recording object.
-;
-function jansen_recording::Init, wtop
+pro jansen_recording::Create, wtop
 
   COMPILE_OPT IDL2, HIDDEN
-
-  self.directory = '~/data'
-  self.filename = 'jansen.h5'
   
   wrecording = widget_base(wtop, /COLUMN, /GRID_LAYOUT, $
                            TITLE = 'Recording', $               ; for WIDGET_TAB
-                           UVALUE = self, $                     ; for object-event handler
-                           EVENT_PRO = 'jansen_object_event', $ ; same event dispatcher for all object widgets
                            RESOURCE_NAME = 'Jansen')
 
   void = cw_field(wrecording, /FRAME, /RETURN_EVENTS, $
@@ -376,8 +368,27 @@ function jansen_recording::Init, wtop
   self.wtgt = wtgt
   self.wfrn = wfrn
   self.frn = 0
+  self.widget_id = wrecording
+end
 
-  return, 1
+;;;;;
+;
+; jansen_recording::Init()
+;
+; Create the widget layout and set up the callback for the
+; video recording object.
+;
+function jansen_recording::Init, wtop, directory, filename
+
+  COMPILE_OPT IDL2, HIDDEN
+
+  self.directory = isa(directory, /string) ? directory[0] : '~/data'
+  self.filename = isa(filename, /string) ? filename[0] : 'jansen.h5'
+  
+  if ~self.Jansen_Widget::Init(wtop) then $
+     return, 0B
+
+  return, 1B
 end
 
 ;;;;;
@@ -389,6 +400,7 @@ pro jansen_recording__define
   COMPILE_OPT IDL2, HIDDEN
 
   struct = {Jansen_Recording, $
+            inherits Jansen_Widget, $
             state: '', $        ; 'paused', 'recording', 'replaying'
             recorder: obj_new(), $
             directory: '', $
