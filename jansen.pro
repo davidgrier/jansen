@@ -91,7 +91,8 @@ pro jansen, state = state
   dimensions = state['camera'].dimensions
 
   ;;; Widget layout
-  wtop = widget_base(/row, title = 'Jansen', mbar = bar, tlb_frame_attr = 5)
+  wtop = widget_base(/row, title = 'Jansen', mbar = bar, tlb_frame_attr = 5, $
+                     bitmap = 'jansen_logo.ico')
 
   ;; menu bar
   jansen_menu, bar
