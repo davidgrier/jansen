@@ -125,9 +125,8 @@ pro jansen, state = state
   winfo = jansen_info(wcontrol, state)
   
   ;; 4. logo!
-  logo = transpose(read_png(jansen_search('csmrlogosm.png')), [1, 2, 0])
-  wlogo = widget_button(wcontrol, value = logo, /bitmap, $
-                        uvalue = 'logo', /align_center)
+  logo = transpose(read_png(jansen_search('csmrlogo.png')), [1, 2, 0])
+  wlogo = widget_button(wcontrol, value = logo, /bitmap, uvalue = 'logo', /align_center)
 
   ;;; Realize widget hierarchy
   widget_control, wtop, /realize

@@ -43,6 +43,16 @@
 ;    UnregisterCallback, name
 ;        Remove the named callback from the list of callbacks.
 ;
+;    RegisterFilter, object
+;        Register a filter that will process each video image
+;        INPUTS:
+;            OBJECT: Object reference to the filter of type
+;            jansen_filter.
+;
+;    UnregisterFilter
+;        Unregisters the present filter, allowing raw video to
+;        be displayed on the screen.
+;
 ; MODIFICATION HISTORY:
 ; 02/12/2015 Written by David G. Grier, New York University
 ; 02/14/2015 remove all recording elements.  Recording will be
