@@ -13,7 +13,7 @@
 
 ;;;;;
 ;
-; jansenVideo::SaveImage
+; jansen_recording::SaveImage
 ;
 pro jansen_recording::SaveImage, image
 
