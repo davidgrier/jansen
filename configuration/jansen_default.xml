@@ -1,5 +1,5 @@
 <configuration>
-  <camera object="fabcamera_fake"
+  <camera object="jansen_camera_fake"
 	  dimensions="[640,480]"
 	  greyscale="1">
   </camera>
@@ -12,8 +12,7 @@
   <stage object="fabstage_fake">
   </stage>
 
-  <video directory="./"
-	 nthreads="default">
+  <video directory="~/data">
   </video>
 
 </configuration>
