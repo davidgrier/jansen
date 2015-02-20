@@ -37,16 +37,18 @@ pro jansen_event, event
 
   widget_control,  event.top,  get_uvalue = state
 
-  if tag_names(event, /structure_name) eq 'WIDGET_BUTTON' then begin
-     widget_control,  event.id, get_uvalue = uval
-     case uval of
-        'QUIT': begin
-           state['video'].record = 0
-           state['video'].play = 0
-           widget_control, event.top, /destroy
-        end
-        else:                   ; unrecognized event
-     endcase
+  case tag_names(event, /structure_name) of
+     'WIDGET_BUTTON': begin
+        widget_control,  event.id, get_uvalue = uval
+        case uval of
+           'QUIT': widget_control, event.top, /destroy
+           else: help, event    ; unrecognized button
+        endcase
+     end
+
+     'WIDGET_TAB':              ; nothing to do
+
+     else: help, event          ; unrecognized event
   endif
   
 end
@@ -140,7 +142,7 @@ pro jansen, state = state
 
   ;;; Graphics hierarchy
   imagemodel = IDLgrModel()
-  imagemodel.add, state["video"]
+  imagemodel.add, state['video']
 
   imageview = IDLgrView(viewplane_rect = [0, 0, dimensions])
   imageview.add, imagemodel
