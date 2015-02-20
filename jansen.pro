@@ -114,11 +114,11 @@ pro jansen, state = state
                         keyboard_events = state.haskey('stage')) ; keyboard moves stage
 
   ;; 1.(b) live results?
-  wdatatab = widget_base(wdatatabs, title = 'Data')
-  wplot = widget_draw(wdatatab, frame = 1, $
-                      graphics_level = 2, $
-                      xsize = dimensions[0], $
-                      ysize = dimensions[1])
+  ;wdatatab = widget_base(wdatatabs, title = 'Data')
+  ;wplot = widget_draw(wdatatab, frame = 1, $
+  ;                    graphics_level = 2, $
+  ;                    xsize = dimensions[0], $
+  ;                    ysize = dimensions[1])
   
   ;; 2. control panel(s)
   wcontrol = widget_base(wtop, /column)
