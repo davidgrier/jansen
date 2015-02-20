@@ -49,7 +49,7 @@ pro jansen_event, event
      'WIDGET_TAB':              ; nothing to do
 
      else: help, event          ; unrecognized event
-  endif
+  endcase
   
 end
 
