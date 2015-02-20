@@ -78,6 +78,8 @@ pro jansen_camera_PointGrey::RegisterProperties
 
   self.setpropertyattribute, 'trigger_mode', sensitive = 0
   self.setpropertyattribute, 'trigger_delay', sensitive = 0
+  self.setpropertyattribute, 'brightness', sensitive = 0
+  self.setpropertyattribute, 'auto_exposure', sensitive = 0
   self.setpropertyattribute, 'frame_rate', sensitive = 0
 end
 
