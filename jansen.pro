@@ -41,7 +41,11 @@ pro jansen_event, event
      'WIDGET_BUTTON': begin
         widget_control,  event.id, get_uvalue = uval
         case uval of
-           'QUIT': widget_control, event.top, /destroy
+           'QUIT': begin
+              state['video'].playing = 0
+              widget_control, event.top, /destroy
+           end
+           
            else: help, event    ; unrecognized button
         endcase
      end
@@ -49,7 +53,7 @@ pro jansen_event, event
      'WIDGET_TAB':              ; nothing to do
 
      else: help, event          ; unrecognized event
-  endif
+  endcase
   
 end
 
