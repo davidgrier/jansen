@@ -142,7 +142,7 @@ pro jansen, state = state
   ;;; Realize widget hierarchy
   widget_control, wtop, /realize
   widget_control, wscreen, get_value = screen
-  widget_control, wplot, get_value = plot
+  ; widget_control, wplot, get_value = plot
 
   ;;; Graphics hierarchy
   imagemodel = IDLgrModel()
