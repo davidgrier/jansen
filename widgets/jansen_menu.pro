@@ -33,14 +33,14 @@ pro jansen_menu, bar
 ;;;
 ;;; VIDEO
 ;;;
-  video_menu = widget_button(bar, value = 'Video', /menu, $
-                             event_pro = 'jansen_menu_event')
-  void = widget_button(video_menu, value = 'Properties...', $
-                       event_pro = 'jansen_properties', uvalue = 'VIDEO')
-  void = widget_button(video_menu, value = 'Camera...', $
-                       event_pro = 'jansen_properties', uvalue = 'CAMERA')
-  void = widget_button(video_menu, value = 'Take Snapshot...', uvalue = 'SNAPSHOT')
-  void = widget_button(video_menu, value = 'Recording Directory...', uvalue = 'RECDIR')
-  void = widget_button(video_menu, value = 'Record', uvalue = 'RECORD')
+;  video_menu = widget_button(bar, value = 'Video', /menu, $
+;                             event_pro = 'jansen_menu_event')
+;  void = widget_button(video_menu, value = 'Properties...', $
+;                       event_pro = 'jansen_properties', uvalue = 'VIDEO')
+;  void = widget_button(video_menu, value = 'Camera...', $
+;                       event_pro = 'jansen_properties', uvalue = 'CAMERA')
+;  void = widget_button(video_menu, value = 'Take Snapshot...', uvalue = 'SNAPSHOT')
+;  void = widget_button(video_menu, value = 'Recording Directory...', uvalue = 'RECDIR')
+;  void = widget_button(video_menu, value = 'Record', uvalue = 'RECORD')
 
 end
