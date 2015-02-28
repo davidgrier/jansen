@@ -207,10 +207,10 @@ function jansen_camera_PointGrey::Property, property, value, $
           {present: present, $
            abscontrol: abscontrol, $
            onepush: onepush, $
-           onoff: onoff, $
-           automanualmode: automanualmode, $
-           valuea: valuea, $
-           valueb: valueb, $
+           onOff: onOff, $
+           autoManualmode: autoManualmode, $
+           valueA: valueA, $
+           valueB: valueB, $
            absvalue: absvalue} : $
           keyword_set(fvalue) ? absvalue : valueA
 
