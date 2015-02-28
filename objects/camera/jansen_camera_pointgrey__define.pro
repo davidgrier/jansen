@@ -68,12 +68,19 @@ pro jansen_camera_PointGrey::RegisterProperties
 
   self.name = 'jansen_camera_pointgrey '
   self.description = 'PointGrey Camera '
+  self.unregisterproperty, 'gain'
+  self.unregisterproperty, 'exposure_time'
 
   foreach property, properties do begin
      info = self.propertyinfo(property)
      if ~info.present || ~info.manualSupported then $
         continue
-     self.registerproperty, property, /integer, valid_range = [info.min, info.max, 1]
+     if info.absValSupported then $
+        self.registerproperty, property, /float, $
+            valid_range = [info.absmin, info.absmax] $
+     else $
+        self.registerproperty, property, /integer, $
+            valid_range = [info.min, info.max]
   endforeach
 
   self.setpropertyattribute, 'trigger_mode', sensitive = 0
@@ -134,7 +141,6 @@ end
 ;
 function jansen_camera_PointGrey::Property, property, value, $
    detailed = detailed, $
-   fvalue = fvalue, $
    on = on, $
    off = off, $
    auto = auto, $
@@ -176,7 +182,7 @@ function jansen_camera_PointGrey::Property, property, value, $
      autoManualMode = keyword_set(manual)
 
   if n_params() eq 2 then begin
-     if keyword_set(fvalue) then begin
+     if info.absValSupported then begin
         absvalue = float(value) > info.absmin < info.absmax
         abscontrol = 1L
      endif else begin
@@ -212,7 +218,7 @@ function jansen_camera_PointGrey::Property, property, value, $
            valueA: valueA, $
            valueB: valueB, $
            absvalue: absvalue} : $
-          keyword_set(fvalue) ? absvalue : valueA
+          info.absValSupported ? absvalue : valueA
 
 end
 
@@ -359,9 +365,6 @@ pro jansen_camera_PointGrey::SetProperty, brightness    = brightness,    $
 
   if isa(temperature, /number, /scalar) then $
      void = self.property('temperature', temperature)
-
-  if isa(gain, /number, /scalar) then $
-     void = self.property('gain', gain)
 
   if isa(hflip, /number, /scalar) then begin
      val = '80000000'XUL + (hflip ne 0)
