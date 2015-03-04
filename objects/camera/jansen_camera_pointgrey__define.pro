@@ -495,9 +495,12 @@ end
 ; Load an image into the IDLgrImage object
 ;
 function jansen_camera_PointGrey::Init, hflip = hflip, $
+                                        debug = _debug, $
                                         _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
+
+  debug = keyword_set(_debug)
 
   ;; look for shared object library in IDL search path
   dlm = 'idlpgr.so'
@@ -506,8 +509,12 @@ function jansen_camera_PointGrey::Init, hflip = hflip, $
      return, 0B
   endif
 
+  if debug then message, self.dlm, /inf
+
   if ~self.jansen_camera::Init(_extra = re) then $
      return, 0B
+
+  if debug then message, 'initialized base class', /inf
 
   nx = 0
   ny = 0
@@ -515,10 +522,14 @@ function jansen_camera_PointGrey::Init, hflip = hflip, $
   if error then $
      return, 0B
 
+  if debug then message, 'opened camera', /inf
+
   a = bytarr(nx, ny)
   self.data = ptr_new(a)
 
   self.registerproperties
+
+  if debug then message, 'registered properties', /inf
 
   if isa(hflip, /number, /scalar) then $
      self.writeregister, '1054'XUL, '80000000'XUL + (hflip ne 0)
