@@ -29,6 +29,7 @@
 ; 03/04/2014 DGG Implement ORDER property
 ; 02/10/2015 DGG Updated PROPERTIES definition.
 ; 02/18/2015 DGG Added EXPOSURE_TIME property as synonym for SHUTTER.
+; 03/04/2015 DGG Revised for DLM-based interface.
 ;
 ; Copyright (c) 2013-2015 David G. Grier
 ;-
@@ -479,8 +480,9 @@ pro jansen_camera_PointGrey::Cleanup
 
   COMPILE_OPT IDL2, HIDDEN
 
-  if (error = call_external(self.dlm, 'close_pgr')) then $
-     message, 'error closing camera', /inf, noprint = ~self.debug
+  idlpgr_StopCapture, self.context
+  idlpgr_DestroyContext, self.context
+  idlpgr_DestroyImage, self.image
 
   self.jansen_camera::Cleanup
 
@@ -499,29 +501,22 @@ function jansen_camera_PointGrey::Init, hflip = hflip, $
 
   COMPILE_OPT IDL2, HIDDEN
 
-  ;; look for shared object library in IDL search path
-  dlm = 'idlpgr.so'
-  if ~(self.dlm = jansen_search(dlm, /test_executable)) then begin
-     message, 'Could not find '+dlm, /inf
-     return, 0B
-  endif
-
   if ~self.jansen_camera::Init(_extra = re) then $
      return, 0B
 
-  nx = 0
-  ny = 0
-  error = call_external(self.dlm, 'open_pgr', nx, ny)
-  if error then $
-     return, 0B
-
-  a = bytarr(nx, ny)
+  self.context = idlpgr_CreateContext()
+  camera = idlpgr_GetCameraFromIndex(self.context, 0)
+  idlpgr_Connect, self.context, camera
+  idlpgr_StartCapture, self.context
+  self.image =  idlpgr_CreateImage(self.context)
+  
+  a = idlpgr_RetrieveBuffer(self.context, self.image)
   self.data = ptr_new(a)
 
-  self.registerproperties
+  ;self.registerproperties
 
-  if isa(hflip, /number, /scalar) then $
-     self.writeregister, '1054'XUL, '80000000'XUL + (hflip ne 0)
+  ;if isa(hflip, /number, /scalar) then $
+  ;   self.writeregister, '1054'XUL, '80000000'XUL + (hflip ne 0)
 
   return, 1B
 end
@@ -538,7 +533,9 @@ COMPILE_OPT IDL2, HIDDEN
 
 struct = {jansen_camera_PointGrey,  $
           inherits jansen_camera,   $
-          dlm: '',              $ 
-          properties: obj_new() $
+          context: 0ULL,            $
+          image: bytarr(48),        $
+          data: ptr_new(),          $
+          properties: obj_new()     $
          }
 end
