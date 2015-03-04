@@ -105,33 +105,7 @@ function jansen_camera_PointGrey::PropertyInfo, property, $
   if (error = ~self.properties.haskey(property)) then $
      return, error
 
-  present = 0L
-  autoSupported = 0L
-  manualSupported = 0L
-  onOffSupported = 0L
-  absValSupported = 0L
-  readOutSupported = 0L
-  min = 0UL
-  max = 0UL
-  absMin = 0.
-  absMax = 0.
-  error = call_external(self.dlm, 'property_info', $
-                        self.properties[property], $
-                        present, autoSupported, manualSupported, $
-                        onOffSupported, absValSupported, readOutSupported, $
-                        min, max, $
-                        absMin, absMax)
-
-  return, {present: present, $
-           autoSupported: autoSupported, $
-           manualSupported: manualSupported, $
-           onOffSupported: onOffSupported, $
-           absValSupported: absValSupported, $
-           readOutSupported: readOutSupported, $
-           min: min, $
-           max: max, $
-           absMin: absMin, $
-           absMax: absMax}
+  return, idlpgr_GetPropertyInfo(self.context, self.properties[property])
 end
 
 ;;;;;
@@ -145,82 +119,46 @@ function jansen_camera_PointGrey::Property, property, value, $
    on = on, $
    off = off, $
    auto = auto, $
-   manual = manual, $
-   error = error
+   manual = manual
 
   COMPILE_OPT IDL2, HIDDEN
 
-  info = self.propertyinfo(property, error = error)
-  if error ne 0 then begin
-     message, 'Cannot retrieve property info from camera', /inf
-     return, -error
-  endif
-
+  info = self.propertyinfo(property)
   if (error = (~info.present || ~info.manualSupported)) then begin
      message, 'Cannot set '+property, /inf
      return, -error
   endif
 
-  present = 0L
-  absControl = 0L
-  onePush = 0L
-  onOff = 0L
-  autoManualMode = 0L
-  valueA = 0UL
-  valueB = 0UL
-  absValue = 0.
+  prop = idlpgr_GetProperty(self.context, self.properties[property])
 
   if isa(on, /number, /scalar) then $
-     onOff = ~keyword_set(on)
+     prop.onOff = ~keyword_set(on)
 
   if isa(off, /number, /scalar) then $
-     onOff = keyword_set(off)
+     prop.onOff = keyword_set(off)
 
   if isa(auto, /number, /scalar) then $
-     autoManualMode = ~keyword_set(auto)
+     prop.autoManualMode = ~keyword_set(auto)
 
   if isa(manual, /number, /scalar) then $
-     autoManualMode = keyword_set(manual)
+     prop.autoManualMode = keyword_set(manual)
 
   if n_params() eq 2 then begin
      if info.absValSupported then begin
-        absvalue = float(value) > info.absmin < info.absmax
-        abscontrol = 1L
+        prop.absvalue = float(value) > info.absmin < info.absmax
+        prop.abscontrol = 1L
      endif else begin
-        valueA = ulong(value) > info.min < info.max
+        prop.valueA = ulong(value) > info.min < info.max
      endelse
      if info.onOffSupported then $
-        onOff = 1L
-     autoManualMode = 0L 
+        prop.onOff = 1L
+     prop.autoManualMode = 0L 
      
-     error = call_external(self.dlm, 'write_property', $
-                           self.properties[property], $
-                           absControl, onePush, onOff, autoManualMode, $
-                           valueA, valueB, absValue)
-     if error ne 0 then begin
-        message, 'Failed to set '+property, /inf
-        return, -error
-     endif
+     idlpgr_SetProperty, self.context, prop
   endif
 
-  error = call_external(self.dlm, 'read_property', $
-                        self.properties[property], $
-                        present, absControl, onePush, onOff, autoManualMode, $
-                        valueA, valueB, absValue)
-  if error ne 0 then $
-     return, -error
-
-  return, keyword_set(detailed) ? $
-          {present: present, $
-           abscontrol: abscontrol, $
-           onepush: onepush, $
-           onOff: onOff, $
-           autoManualmode: autoManualmode, $
-           valueA: valueA, $
-           valueB: valueB, $
-           absvalue: absvalue} : $
-          info.absValSupported ? absvalue : valueA
-
+  return, keyword_set(detailed) ? prop : $
+          info.absValSupported ? prop.absvalue : prop.valueA
 end
 
 ;;;;;
@@ -518,9 +456,9 @@ function jansen_camera_PointGrey::Init, hflip = hflip, $
   a = idlpgr_RetrieveBuffer(self.context, self.image)
   self.data = ptr_new(a)
 
-  ;self.registerproperties
+  self.registerproperties
 
-  ;if debug then message, 'registered properties', /inf
+  if debug then message, 'registered properties', /inf
 
   ;if isa(hflip, /number, /scalar) then $
   ;   self.writeregister, '1054'XUL, '80000000'XUL + (hflip ne 0)
