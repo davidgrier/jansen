@@ -542,7 +542,6 @@ struct = {jansen_camera_PointGrey,  $
           inherits jansen_camera,   $
           context: 0ULL,            $
           image: bytarr(48),        $
-          data: ptr_new(),          $
           properties: obj_new()     $
          }
 end
