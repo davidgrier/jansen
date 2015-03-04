@@ -167,19 +167,12 @@ end
 ;
 ; Reads value from specified register
 ;
-function jansen_camera_PointGrey::ReadRegister, address, $
-   error = error
+function jansen_camera_PointGrey::ReadRegister, address
 
   COMPILE_OPT IDL2, HIDDEN
 
-  if ~isa(address, 'ulong') then $
-     return, 0
-
-;address = '1A60'XUL
-  value = ulong(0)
-  error = call_external(self.dlm, 'read_register', address, value)
-  return, value
-
+  ;;address = '1A60'XUL
+  return, idlpgr_ReadRegister(self.context, address)
 end
 
 ;;;;;
@@ -192,15 +185,7 @@ pro jansen_camera_PointGrey::WriteRegister, address, value
 
   COMPILE_OPT IDL2, HIDDEN
 
-  if (error = ~isa(address, 'ulong')) then $
-     return
-
-
-  if (error = ~isa(value, 'ulong')) then $
-     return
-
-  error = call_external(self.dlm, 'write_register', address, value)
-
+  idlpgr_WriteRegister, self.context, address, value
 end
 
 ;;;;;
@@ -213,10 +198,9 @@ pro jansen_camera_PointGrey::Read
 
   COMPILE_OPT IDL2, HIDDEN
 
-  error = call_external(self.dlm, 'read_pgr', *self.data)
+  *self.data = idlpgr_RetrieveBuffer(self.context, self.image)
   if self.order then $
      *self.data = reverse(temporary(*self.data), 2)
-
 end
 
 ;;;;;
