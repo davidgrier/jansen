@@ -1,3 +1,32 @@
+;+
+; NAME:
+;    Jansen_Filter_Median
+;
+; PURPOSE:
+;    Median filter for the Jansen video system
+;
+; SUPERCLASSES:
+;    Jansen_Filter
+;
+; PROPERTIES:
+;    [I S] SOURCE: Object reference to source of images
+;    [ G ] DATA: Median filtered image from source.
+;    [IGS] ORDER: Order of the filter
+;        Default: 3
+;    [IGS] RUNNING: Flag: If set, performing running median
+;
+; METHODS:
+;    GetProperty
+;    SetProperty
+;
+; NOTES:
+;    Should handle color images: median on each channel
+;
+; MODIFICATION HISTORY:
+; 03/15/2015 Written by David G. Grier, New York University
+;
+; Copyright (c) David G. Grier
+;-
 ;;;;;
 ;
 ; jansen_filter_median::GetProperty
