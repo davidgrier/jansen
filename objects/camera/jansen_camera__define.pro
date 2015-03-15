@@ -67,7 +67,10 @@ pro jansen_camera::read
 
   dimensions = size(*self.data, /dimensions)
   *self.data = byte(255*randomu(seed, dimensions))
-  *self.data = rotate(temporary(*self.data), (5*self.hflip + 7*self.order) mod 10)
+  if self.hflip then $
+     *self.data = reverse(*self.data, 1, /overwrite)
+  if self.order then $
+     *self.data = reverse(*self.data, 2, /overwrite)
 end
 
 ;;;;;
