@@ -171,10 +171,13 @@ function jansen_camera::Init, dimensions = dimensions, $
      return, 0B
 
   if isa(dimensions, /number, /array) then begin
+     print, 'got :', dimensions
      if ~total(n_elements(dimensions) eq [2, 3]) then $
         return, 0B
   endif else $
      dimensions = [640L, 480]
+
+  print, dimensions
   
   if isa(mpp, /scalar, /number) then $
      self.mpp = float(mpp)
