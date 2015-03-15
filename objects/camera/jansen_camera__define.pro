@@ -42,15 +42,12 @@
 ;
 ; jansen_camera::read()
 ;
-; Classes that can provide hflip and order in hardware should override
-; this function for greater efficiency.  
-; 
 function jansen_camera::read
   
   COMPILE_OPT IDL2, HIDDEN
   
   self.read
-  return, rotate(temporary(*self.data), (5*self.hflip + 7*self.order) mod 10)
+  return, *self.data
 end
 
 ;;;;;
@@ -61,6 +58,8 @@ end
 ; and either should replace the values in *self.data, as is done here,
 ; or else should move the pointer to a new data set, as in
 ; self.data = ptr_new(newimage, /no_copy)
+;
+; If possible, inheriting classes should support hflip and order in hardware.
 ; 
 pro jansen_camera::read
 
@@ -68,6 +67,7 @@ pro jansen_camera::read
 
   dimensions = size(*self.data, /dimensions)
   *self.data = byte(255*randomu(seed, dimensions))
+  *self.data = rotate(temporary(*self.data), (5*self.hflip + 7*self.order) mod 10)
 end
 
 ;;;;;
@@ -99,7 +99,7 @@ pro jansen_camera::SetProperty, dimensions = dimensions, $
      self.order = (order ne 0)
 
   if isa(hflip, /scalar, /number) then $
-     self.hflip = (hflip ne 0)
+     self.hflip = keyword_set(hflip)
 
   if isa(mpp, /scalar, /number) then $
      self.mpp = mpp
@@ -177,10 +177,10 @@ function jansen_camera::Init, dimensions = dimensions, $
      self.mpp = float(mpp)
 
   if isa(order, /scalar, /number) then $
-     self.order = (order ne 0)
+     self.order = keyword_set(order)
 
   if isa(hflip, /scalar, /number) then $
-     self.hflip = (hflip ne 0)
+     self.hflip = keyword_set(hflip)
 
   self.data = ptr_new(make_array(dimensions, /byte), /no_copy)
 

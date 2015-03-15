@@ -30,6 +30,7 @@ pro jansen_camera_opencv::Read, geometry = geometry
   COMPILE_OPT IDL2, HIDDEN
 
   self.data = ptr_new(self.dgghwvideo::read(), /no_copy)
+  *self.data = rotate(temporary(*self.data), (5*self.hflip + 7*self.order) mod 10)
 end
 
 ;;;;;
