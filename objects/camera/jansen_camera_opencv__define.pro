@@ -7,14 +7,10 @@
 ;
 ; INHERITS
 ;    jansen_camera
+;    DGGhwVideo
 ;
 ; PROPERTIES
-;    DLM    [ G ]
-;        file specification of object library.
-;
-;    NUMBER [IG ]
-;        index of OpenCV camera.
-;        Default: 0
+;    [IGS] GREYSCALE: boolean flag to provide greyscale images.
 ;
 ; MODIFICATION HISTORY
 ; 12/26/2013 Written by David G. Grier, New York University
@@ -34,7 +30,6 @@ pro jansen_camera_opencv::Read, geometry = geometry
   COMPILE_OPT IDL2, HIDDEN
 
   self.data = ptr_new(self.dgghwvideo::read(), /no_copy)
-  *self.data = rotate(temporary(*self.data), (5*self.hflip + 7*self.order) mod 10)
 end
 
 ;;;;;
@@ -77,14 +72,15 @@ function jansen_camera_opencv::Init, _ref_extra = re
 
   if ~self.dgghwvideo::init(_extra = re) then $
      return, 0B
-  
-  if ~self.jansen_camera::init(_extra = re) then $
-     return, 0B
 
   self.data = ptr_new(self.dgghwvideo::read(), /no_copy)
 
+  if ~self.jansen_camera::init(_extra = re) then $
+     return, 0B
+  
   self.name = 'jansen_camera_opencv '
   self.description = 'OpenCV Camera '
+  self.registerproperty, 'greyscale', /boolean
   
   return, 1B
 end

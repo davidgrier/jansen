@@ -13,16 +13,10 @@
 ;        [ G ] byte-valued array of image data
 ;    DIMENSIONS
 ;        [IG ] [w,h,[3]] dimensions of images
-;    EXPOSURE_TIME
-;        [IGS] exposure time of camera
-;    GAIN
-;        [IGS] gain of camera
 ;    ORDER
 ;        [IGS] flag: if set, flip image vertically
 ;    HFLIP
 ;        [IGS] flag: if set, flip image horizontally
-;    GREYSCALE
-;        [IG ] flag: If set deliver greyscale images
 ;    MPP
 ;        [IGS] Magnification [micrometers/pixel]
 ;
@@ -51,8 +45,7 @@ function jansen_camera::read
   COMPILE_OPT IDL2, HIDDEN
   
   self.read
-  data = *self.data
-  return, data
+  return, rotate(temporary(*self.data), (5*self.hflip + 7*self.order) mod 10)
 end
 
 ;;;;;
@@ -65,7 +58,6 @@ pro jansen_camera::read
 
   dimensions = size(*self.data, /dimensions)
   *self.data = byte(255*randomu(seed, dimensions))
-
 end
 
 ;;;;;
@@ -75,11 +67,9 @@ end
 pro jansen_camera::SetProperty, dimensions = dimensions, $
                                 exposure_time = exposure_time, $
                                 gain = gain, $
-                                greyscale = greyscale, $
                                 order = order, $
                                 hflip = hflip, $
                                 mpp = mpp, $
-                                debug = debug, $
                                 _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
@@ -95,9 +85,6 @@ pro jansen_camera::SetProperty, dimensions = dimensions, $
   if isa(gain, /scalar, /number) then $
      self.gain = gain
 
-  if isa(greyscale, /scalar, /number) then $
-     message, 'GREYSCALE can only be set at initialization', /inf
-
   if isa(order, /scalar, /number) then $
      self.order = (order ne 0)
 
@@ -106,10 +93,6 @@ pro jansen_camera::SetProperty, dimensions = dimensions, $
 
   if isa(mpp, /scalar, /number) then $
      self.mpp = mpp
-
-  if isa(debug, /scalar, /number) then $
-     self.debug = debug
-
 end
 
 ;;;;;
@@ -118,13 +101,9 @@ end
 ;
 pro jansen_camera::GetProperty, data = data, $
                                 dimensions = dimensions, $
-                                exposure_time = exposure_time, $
-                                gain = gain, $
-                                greyscale = greyscale, $
                                 order = order, $
                                 hflip = hflip, $
                                 mpp = mpp, $
-                                debug = debug, $
                                 _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
@@ -140,28 +119,14 @@ pro jansen_camera::GetProperty, data = data, $
         dimensions = dimensions[where(dimensions ne 3)]
   endif
   
-
   if arg_present(mpp) then $
      mpp = self.mpp
-
-  if arg_present(exposure_time) then $
-     exposure_time = self.exposure_time
-
-  if arg_present(gain) then $
-     gain = self.gain
-
-  if arg_present(greyscale) then $
-     greyscale = self.greyscale
 
   if arg_present(order) then $
      order = self.order
 
   if arg_present(hflip) then $
      hflip = self.hflip
-
-  if arg_present(debug) then $
-     debug = self.debug
-
 end
                             
 ;;;;;
@@ -173,7 +138,6 @@ pro jansen_camera::Cleanup
   COMPILE_OPT IDL2, HIDDEN
 
   ptr_free, self.data
-
 end
 
 ;;;;;
@@ -183,13 +147,9 @@ end
 ; Should be overriden by specific camera implementation
 ;
 function jansen_camera::Init, dimensions = dimensions, $
-                              exposure_time = exposure_time, $
-                              gain = gain, $
-                              greyscale = greyscale, $
                               order = order, $
                               hflip = hflip, $
                               mpp = mpp, $
-                              debug = debug, $
                               _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
@@ -197,20 +157,12 @@ function jansen_camera::Init, dimensions = dimensions, $
   if ~self.fab_object::Init(_extra = re) then $
      return, 0B
 
-  self.debug = keyword_set(debug)
-
   if isa(dimensions, /number, /array) then begin
      if ~total(n_elements(dimensions) eq [2, 3]) then $
         return, 0B
   endif else $
      dimensions = [640L, 480]
   
-  if isa(exposure_time, /scalar, /number) then $
-     self.exposure_time = exposure_time
-  
-  if isa(gain, /scalar, /number) then $
-     self.gain = gain
-
   if isa(mpp, /scalar, /number) then $
      self.mpp = float(mpp)
 
@@ -222,19 +174,13 @@ function jansen_camera::Init, dimensions = dimensions, $
 
   self.data = ptr_new(make_array(dimensions, /byte), /no_copy)
 
-  self.greyscale = n_elements(dimensions) eq 2
-
   self.name = 'jansen_camera '
   self.description = 'Generic Camera '
   self.setpropertyattribute, 'name', sensitive = 0
   self.setpropertyattribute, 'description', sensitive = 0
   self.registerproperty, 'order', enum = ['Normal', 'Flipped']
   self.registerproperty, 'hflip', enum = ['Normal', 'Flipped']
-  self.registerproperty, 'exposure_time', /float, sensitive = 0
-  self.registerproperty, 'gain', /float, sensitive = 0
-  self.registerproperty, 'greyscale', /boolean, sensitive = 0
-  self.registerproperty, 'mpp', /float, sensitive = 0
-  self.setpropertyattribute, 'mpp', hide = (self.mpp eq 0)
+  self.registerproperty, 'mpp', /float, hide = 1
 
   return, 1B
 end
@@ -250,12 +196,8 @@ pro jansen_camera__define
   struct = {jansen_camera, $
             inherits fab_object, $
             data: ptr_new(), $
-            exposure_time: 0., $
-            gain: 0., $
-            greyscale: 0L, $
             order: 0L, $
             hflip: 0L, $
-            mpp: 0., $
-            debug: 0L $
+            mpp: 0. $
            }
 end
