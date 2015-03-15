@@ -32,6 +32,8 @@
 ; 03/04/2014 DGG Implemented ORDER property.
 ; 04/06/2014 DGG Enum values for ORDER and HFLIP.
 ; 02/18/2015 DGG Added EXPOSURE_TIME and GAIN properties
+; 03/15/2015 DGG Removed properties that are not actually provided by
+;     the base class
 ;
 ; Copyright (c) 2013-2015 David G. Grier
 ;-
@@ -40,6 +42,8 @@
 ;
 ; jansen_camera::read()
 ;
+; Classes that can provide hflip and order in hardware
+; 
 function jansen_camera::read
   
   COMPILE_OPT IDL2, HIDDEN
@@ -52,6 +56,11 @@ end
 ;
 ; jansen_camera::read
 ;
+; Classes that inherit jansen_camera should override this procedure
+; and either should replace the values in *self.data, as is done here,
+; or else should move the pointer to a new data set, as in
+; self.data = ptr_new(newimage, /no_copy)
+; 
 pro jansen_camera::read
 
   COMPILE_OPT IDL2, HIDDEN
