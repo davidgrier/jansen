@@ -33,54 +33,27 @@ pro jansen_camera_opencv::Read, geometry = geometry
 
   COMPILE_OPT IDL2, HIDDEN
 
-  if n_elements(geometry) eq 2 then begin
-     w = long(geometry[0])
-     h = long(geometry[1])
-  endif else begin
-     w = self.width
-     h = self.height
-  endelse
-
-  err = call_external(self.dlm, 'video_readvideoframe', /cdecl, $
-                      self.stream, $
-                      *self.data, w, h, $
-                      self.greyscale, self.debug)
-
+  self.data = ptr_new(self.dgghwvideo::read(), /no_copy)
   *self.data = rotate(temporary(*self.data), (5*self.hflip + 7*self.order) mod 10)
-
 end
 
 ;;;;;
 ;
 ; jansen_camera_opencv::GetProperty
 ;
-pro jansen_camera_opencv::GetProperty, dlm = dlm, $
-                                       number = number, $
-                                       stream = stream, $
-                                       _ref_extra = ex
+pro jansen_camera_opencv::GetProperty, _ref_extra = ex
 
   COMPILE_OPT IDL2, HIDDEN
 
+  self.dgghwvideo::GetProperty, _extra = ex
   self.jansen_camera::GetProperty, _extra = ex
-
-  if arg_present(dlm) then $
-     dlm = self.dlm
-
-  if arg_present(number) then $
-     number = self.number
-
-  if arg_present(stream) then $
-     stream = self.stream
-
 end
                                    
 ;;;;;
 ;
 ; jansen_camera_opencv::Init()
 ;
-function jansen_camera_opencv::Init, dimensions = dimensions, $
-                                     number = number, $
-                                     _ref_extra = re
+function jansen_camera_opencv::Init, _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
 
@@ -90,44 +63,13 @@ function jansen_camera_opencv::Init, dimensions = dimensions, $
      return, 0B
   endif
 
-  ;; look for shared object library in IDL search path
-  dlm = 'idlvideo.so'
-  if ~(self.dlm = jansen_search(dlm, /test_executable)) then begin
-     message, 'could not find '+dlm, /inf
+  if ~self.dgghwvideo::init(_extra = re) then $
      return, 0B
-  endif
-
+  
   if ~self.jansen_camera::init(_extra = re) then $
      return, 0B
 
-  self.number = (isa(number, /scalar, /number)) ? long(number) > 0 : -1L
-
-  stream = 0L
-  if isa(dimensions, /number) and n_elements(dimensions) eq 2 then begin
-     width = long(dimensions[0])
-     height = long(dimensions[1])
-  endif else begin
-     width = 0L
-     height = 0L
-  endelse
-  nchannels = 0L
-
-  err = call_external(self.dlm, 'video_queryvideocamera', /cdecl, $
-                      self.number, $
-                      stream, width, height, nchannels, $
-                      self.debug)
-  if err ne 0 then begin
-     message, 'could not acquire an image', /inf, noprint = ~self.debug
-     return, 0B
-  endif
-  self.stream = stream
-  self.width = width
-  self.height = height
-  self.nchannels = nchannels
-
-  self.data = (self.nchannels gt 1) and ~self.greyscale ? $
-              ptr_new(bytarr(self.width, self.height, self.nchannels, /nozero), /no_copy) : $
-              ptr_new(bytarr(self.width, self.height, /nozero), /no_copy)
+  self.data = ptr_new(self.dgghwvideo::read(), /no_copy)
 
   self.name = 'jansen_camera_opencv '
   self.description = 'OpenCV Camera '
@@ -143,13 +85,8 @@ pro jansen_camera_opencv::Cleanup
 
   COMPILE_OPT IDL2, HIDDEN
 
-  err = call_external(self.dlm, 'video_closevideosource', /cdecl, $
-                      self.stream, self.debug)
-  if err then $
-     message, 'error closing camera', /inf, noprint = ~self.debug
-
   self.jansen_camera::Cleanup
-
+  self.dgghwvideo::Cleanup
 end
 
 ;;;;;
@@ -161,12 +98,7 @@ pro jansen_camera_opencv__define
   COMPILE_OPT IDL2, HIDDEN
 
   struct = {jansen_camera_opencv, $
-            inherits jansen_camera, $
-            dlm: '', $
-            number: 0L, $       ; camera number
-            stream: 0L, $       ; video stream
-            width: 0L, $
-            height: 0L, $
-            nchannels: 0L $
+            inherits dgghwvideo, $
+            inherits jansen_camera $
            }
 end

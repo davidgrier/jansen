@@ -134,8 +134,12 @@ pro jansen_camera::GetProperty, data = data, $
   if arg_present(data) then $
      data = *self.data
 
-  if arg_present(dimensions) then $
+  if arg_present(dimensions) then begin
      dimensions = size(*self.data, /dimensions)
+     if n_elements(dimensions) eq 3 then $
+        dimensions = dimensions[where(dimensions ne 3)]
+  endif
+  
 
   if arg_present(mpp) then $
      mpp = self.mpp
