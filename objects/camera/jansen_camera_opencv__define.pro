@@ -27,7 +27,7 @@
 
 ;;;;;
 ;
-; jansen_camera_opencv::read
+; jansen_camera_opencv::Read
 ;
 pro jansen_camera_opencv::Read, geometry = geometry
 
@@ -35,6 +35,18 @@ pro jansen_camera_opencv::Read, geometry = geometry
 
   self.data = ptr_new(self.dgghwvideo::read(), /no_copy)
   *self.data = rotate(temporary(*self.data), (5*self.hflip + 7*self.order) mod 10)
+end
+
+;;;;;
+;
+; jansen_camera_opencv::SetProperty
+;
+pro jansen_camera_opencv::SetProperty, _ref_extra = ex
+
+  COMPILE_OPT IDL2, HIDDEN
+
+  self.dgghwvideo::SetProperty, _extra = ex
+  self.jansen_camera::SetProperty, _extra = ex
 end
 
 ;;;;;
