@@ -42,7 +42,8 @@
 ;
 ; jansen_camera::read()
 ;
-; Classes that can provide hflip and order in hardware
+; Classes that can provide hflip and order in hardware should override
+; this function for greater efficiency.  
 ; 
 function jansen_camera::read
   
