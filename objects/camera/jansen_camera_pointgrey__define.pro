@@ -58,8 +58,6 @@ pro jansen_camera_pointgrey::RegisterProperties
 
   self.name = 'jansen_camera_pointgrey '
   self.description = 'PointGrey Camera '
-  self.unregisterproperty, 'gain'
-  self.unregisterproperty, 'exposure_time'
 
   foreach property, self.properties.keys() do begin
      info = self.propertyinfo(property)
@@ -73,6 +71,8 @@ pro jansen_camera_pointgrey::RegisterProperties
             valid_range = [info.min, info.max]
   endforeach
 
+  self.registerproperty, 'grayscale', /boolean, sensitive = 0
+  
   self.setpropertyattribute, 'trigger_mode', sensitive = 0
   self.setpropertyattribute, 'trigger_delay', sensitive = 0
   self.setpropertyattribute, 'brightness', sensitive = 0
@@ -90,9 +90,11 @@ pro jansen_camera_pointgrey::Read
 
   COMPILE_OPT IDL2, HIDDEN
 
-  *self.data = self.dgghwpointgrey::read()
+  ;;*self.data = self.dgghwpointgrey::read()
+  self.data = ptr_new(self.dgghwpointgrey::read(), /no_copy)
+  ;; NOTE: Is NO_COPY safe?
   if self.order then $
-     *self.data = reverse(temporary(*self.data), 2)
+     *self.data = reverse(*self.data, 3 - self.grayscale, /overwrite)
 end
 
 ;;;;;
@@ -166,6 +168,9 @@ function jansen_camera_pointgrey::Init, _ref_extra = re
      return, 0B
   
   self.data = ptr_new(self.dgghwpointgrey::read())
+  ;; NOTE: Can we use NO_COPY safely?
+
+  self.grayscale = (size(*self.data, /n_dimensions) eq 2)
 
   self.registerproperties
 
@@ -184,6 +189,7 @@ pro jansen_camera_pointgrey__define
   
   struct = {jansen_camera_pointgrey, $
             inherits jansen_camera,  $
-            inherits dgghwpointgrey  $
+            inherits dgghwpointgrey. $
+            grayscale: 0L            $
            }
 end
