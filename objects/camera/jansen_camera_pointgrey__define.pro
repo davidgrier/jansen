@@ -189,7 +189,7 @@ pro jansen_camera_pointgrey__define
   
   struct = {jansen_camera_pointgrey, $
             inherits jansen_camera,  $
-            inherits dgghwpointgrey. $
+            inherits dgghwpointgrey, $
             grayscale: 0L            $
            }
 end
