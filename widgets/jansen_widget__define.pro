@@ -41,7 +41,7 @@ pro jansen_widget::SetProperty, title = title, $
 
   COMPILE_OPT IDL2, HIDDEN
 
-  if isa(title, /string) then $
+  if isa(title, 'string') then $
      widget_control, self.widget_id, tlb_set_title = title[0]
 
   if isa(offset, /number, /array) then $
@@ -106,8 +106,8 @@ function jansen_widget::Init, wtop
 
   COMPILE_OPT IDL2, HIDDEN
 
-  self.name = isa(name, /string) ? name[0] : obj_class(self)
-  if isa(title, /string) then $
+  self.name = isa(name, 'string') ? name[0] : obj_class(self)
+  if isa(title, 'string') then $
      self.title = title
   self.create, wtop
   widget_control, self.widget_id, set_uvalue = self
