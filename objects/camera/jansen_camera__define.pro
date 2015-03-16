@@ -78,8 +78,6 @@ end
 ; jansen_camera::SetProperty
 ;
 pro jansen_camera::SetProperty, dimensions = dimensions, $
-                                exposure_time = exposure_time, $
-                                gain = gain, $
                                 order = order, $
                                 hflip = hflip, $
                                 mpp = mpp, $
@@ -91,12 +89,6 @@ pro jansen_camera::SetProperty, dimensions = dimensions, $
 
   if isa(dimensions, /number, /array) then $
      message, 'DIMENSIONS can only be set at initialization', /inf
-
-  if isa(exposure_time, /scalar, /number) then $
-     self.exposure_time = exposure_time
-
-  if isa(gain, /scalar, /number) then $
-     self.gain = gain
 
   if isa(order, /scalar, /number) then $
      self.order = (order ne 0)

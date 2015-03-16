@@ -136,6 +136,7 @@ pro jansen_video::handleTimerEvent, id, userdata
   self.camera.read              ; update camera.data
 
   self.IDLgrImage::SetProperty, data = self.filter.data
+;  self.parent.parent.draw
   self.screen.draw
 
   self.handleCallbacks
