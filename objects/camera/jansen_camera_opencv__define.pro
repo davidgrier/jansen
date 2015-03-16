@@ -64,7 +64,7 @@ end
 ;
 ; jansen_camera_opencv::Init()
 ;
-function jansen_camera_opencv::Init, dimensions = dimensions, $
+function jansen_camera_opencv::Init, dimensions = _dimensions, $
                                      _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
@@ -75,11 +75,10 @@ function jansen_camera_opencv::Init, dimensions = dimensions, $
      return, 0B
   endif
 
-  if ~self.dgghwvideo::init(dimensions = dimensions, _extra = re) then $
+  if ~self.dgghwvideo::init(dimensions = _dimensions, _extra = re) then $
      return, 0B
 
-  if ~isa(dimensions, /number, /array) then $
-     self.dgghwvideo::GetProperty, dimensions = dimensions
+  self.dgghwvideo::GetProperty, dimensions = dimensions
 
   if ~self.jansen_camera::init(dimensions = dimensions, _extra = re) then $
      return, 0B
