@@ -78,13 +78,13 @@ function jansen_camera_opencv::Init, dimensions = dimensions, $
   if ~self.dgghwvideo::init(dimensions = dimensions, _extra = re) then $
      return, 0B
 
-  self.data = ptr_new(self.dgghwvideo::read(), /no_copy)
-  
   if ~isa(dimensions, /number, /array) then $
      self.dgghwvideo::GetProperty, dimensions = dimensions
 
   if ~self.jansen_camera::init(dimensions = dimensions, _extra = re) then $
      return, 0B
+
+  self.data = ptr_new(self.dgghwvideo::read(), /no_copy)
   
   self.name = 'jansen_camera_opencv '
   self.description = 'OpenCV Camera '
