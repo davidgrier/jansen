@@ -25,7 +25,7 @@
 ;
 ; jansen_camera_opencv::Read
 ;
-pro jansen_camera_opencv::Read, geometry = geometry
+pro jansen_camera_opencv::Read
 
   COMPILE_OPT IDL2, HIDDEN
 
