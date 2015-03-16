@@ -1,6 +1,6 @@
 ;+
 ; NAME
-;    fabcamera_fake()
+;    jansen_camera_fake()
 ;
 ; PURPOSE
 ;    Object interface for simulated digital camera.
@@ -28,13 +28,14 @@
 ;
 ; MODIFICATION HISTORY
 ; 12/26/2013 Written by David G. Grier, New York University
+; 03/16/2015 Revised for jansen.
 ;
-; Copyright (c) 2013 David G. Grier
+; Copyright (c) 2013-2015 David G. Grier
 ;-
-pro fabcamera_fake__define
+pro jansen_camera_fake__define
 
 COMPILE_OPT IDL2, HIDDEN
 
-void = {fabcamera_fake, $
-        inherits fabcamera}
+void = {jansen_camera_fake, $
+        inherits jansen_camera}
 end
