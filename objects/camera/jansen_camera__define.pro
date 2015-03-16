@@ -176,8 +176,6 @@ function jansen_camera::Init, dimensions = dimensions, $
   endif else $
      dimensions = [640L, 480]
 
-  print, dimensions
-  
   if isa(mpp, /scalar, /number) then $
      self.mpp = float(mpp)
 
