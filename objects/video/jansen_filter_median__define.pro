@@ -39,9 +39,11 @@ pro jansen_filter_median::GetProperty, data = data, $
 
   if arg_present(data) then begin
      data = self.source.data
-     if self.running || ~self.median.initialized then $
-        self.median.add, data
-     data = byte(128.*float(data)/self.median.get())
+     if obj_valid(self.median) then begin
+        if self.running || ~self.median.initialized then $
+           self.median.add, data
+        data = byte(128.*float(data)/self.median.get())
+     endif
   endif
 
   if arg_present(order) then $
@@ -60,15 +62,14 @@ pro jansen_filter_median::SetProperty, source = source, $
                                        running = running
   COMPILE_OPT IDL2, HIDDEN
 
+  !except = self.except
+
   if obj_valid(source) then begin
      self.source = source
+     data = self.source.data
      if obj_valid(self.median) then $
         obj_destroy, self.median
-     median = numedian(order = self.order, data = self.source.data)
-     print, 'got here'
-     help, median
-     self.median = median
-     help, self.median
+     self.median = numedian(order = self.order, data = data)
   endif
 
   if isa(order, /number, /scalar) then begin
@@ -78,7 +79,6 @@ pro jansen_filter_median::SetProperty, source = source, $
 
   if isa(running, /number, /scalar) then $
      self.running = keyword_set(running)
-  
 end
 
 ;;;;;
@@ -104,6 +104,9 @@ function jansen_filter_median::Init, source = source, $
 
   self.running = keyword_set(running)
 
+  self.except = !except
+  !except = 0
+
   return, 1B
 end
 
@@ -121,6 +124,7 @@ pro jansen_filter_median__define
             inherits jansen_filter, $
             median: obj_new(), $
             order: 0L, $
-            running: 0L $
+            running: 0L, $
+            except: 0L $
            }
 end
