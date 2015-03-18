@@ -91,8 +91,11 @@ function jansen_filter_median::Init, source = source, $
   
   self.order = isa(order, /number, /scalar) ? long(order) > 3L : 3L
 
-  if isa(self.source) then $
+  if isa(self.source) then begin
      self.median = numedian(order = self.order, data = self.source.data)
+     if ~isa(self.median) then $
+        return, 0B
+  endif
 
   self.running = keyword_set(running)
 
