@@ -167,7 +167,7 @@ function jansen_camera_pointgrey::Init, _ref_extra = re
   if ~self.dgghwpointgrey::Init(_extra = re) then $
      return, 0B
   
-  self.data = ptr_new(self.dgghwpointgrey::read())
+  self.data = ptr_new(self.dgghwpointgrey::read(), /no_copy)
   ;; NOTE: Can we use NO_COPY safely?
 
   self.grayscale = (size(*self.data, /n_dimensions) eq 2)
@@ -189,7 +189,6 @@ pro jansen_camera_pointgrey__define
   
   struct = {jansen_camera_pointgrey, $
             inherits jansen_camera,  $
-            inherits dgghwpointgrey, $
-            grayscale: 0L            $
+            inherits dgghwpointgrey  $
            }
 end
