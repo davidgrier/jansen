@@ -90,9 +90,8 @@ pro jansen_camera_pointgrey::Read
 
   COMPILE_OPT IDL2, HIDDEN
 
-  ;;*self.data = self.dgghwpointgrey::read()
   self.data = ptr_new(self.dgghwpointgrey::read(), /no_copy)
-  ;; NOTE: Is NO_COPY safe?
+
   if self.order then $
      *self.data = reverse(*self.data, 3 - self.grayscale, /overwrite)
 end
@@ -168,7 +167,6 @@ function jansen_camera_pointgrey::Init, _ref_extra = re
      return, 0B
   
   self.data = ptr_new(self.dgghwpointgrey::read(), /no_copy)
-  ;; NOTE: Can we use NO_COPY safely?
 
   self.grayscale = (size(*self.data, /n_dimensions) eq 2)
 

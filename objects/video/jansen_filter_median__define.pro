@@ -62,8 +62,13 @@ pro jansen_filter_median::SetProperty, source = source, $
 
   if obj_valid(source) then begin
      self.source = source
-     obj_destroy, self.median
-     self.median = numedian(order = self.order, data = self.source.data)
+     if obj_valid(self.median) then $
+        obj_destroy, self.median
+     median = numedian(order = self.order, data = self.source.data)
+     print, 'got here'
+     help, median
+     self.median = median
+     help, self.median
   endif
 
   if isa(order, /number, /scalar) then begin
