@@ -9,6 +9,10 @@
 ;    jansen_camera
 ;    DGGhwVideo
 ;
+; EXTERNAL LIBRARIES:
+;    idlvideo: https://github.com/davidgrier/idlvideo
+;        Provides DGGhwVideo.
+;
 ; PROPERTIES
 ;    [IGS] GREYSCALE: boolean flag to provide greyscale images.
 ;
