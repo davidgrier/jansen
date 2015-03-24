@@ -9,16 +9,11 @@
 ;    jansen_object
 ;
 ; PROPERTIES
-;    DATA
-;        [ G ] byte-valued array of image data
-;    DIMENSIONS
-;        [IG ] [w,h,[3]] dimensions of images
-;    ORDER
-;        [IGS] flag: if set, flip image vertically
-;    HFLIP
-;        [IGS] flag: if set, flip image horizontally
-;    MPP
-;        [IGS] Magnification [micrometers/pixel]
+; [ G ] DATA: byte-valued array of image data
+; [IG ] DIMENSIONS: [[3], w, h] dimensions of images
+; [IGS] ORDER: flag: if set, flip image vertically
+; [IGS] HFLIP: flag: if set, flip image horizontally
+; [IGS] MPP: Magnification [micrometers/pixel]
 ;
 ; METHODS
 ;    READ()
