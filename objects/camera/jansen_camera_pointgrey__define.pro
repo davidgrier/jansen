@@ -8,9 +8,9 @@
 ;
 ; INHERITS:
 ;    jansen_camera
-;    dgghwpointgrey
+;    DGGhwPointGrey
 ;
-; REQUIREMENTS:
+; EXTERNAL LIBRARIES:
 ;    DGGhwPointGrey is defined in the idlpgr repository, which is
 ;    available at http://github.com/davidgrier/idlpgr
 ;    idlpgr provides IDL with a hardware interface to PointGrey's
