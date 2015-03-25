@@ -50,6 +50,22 @@
 
 ;;;;;
 ;
+; jansen_camera_pointgrey::InitializeProperties
+;
+pro jansen_camera_pointgrey::InitializeProperties
+
+  COMPILE_OPT IDL2, HIDDEN
+
+  foreach property, self.properties.keys() do begin
+     info = self.propertyinfo(property)
+     if ~info.present || ~info.manualSupported then $
+        continue
+     self.controlproperty, property, /manual
+  endforeach
+end
+
+;;;;;
+;
 ; jansen_camera_pointgrey::RegisterProperties
 ;
 pro jansen_camera_pointgrey::RegisterProperties
@@ -170,6 +186,7 @@ function jansen_camera_pointgrey::Init, _ref_extra = re
 
   self.grayscale = (size(*self.data, /n_dimensions) eq 2)
 
+  self.initializeproperties
   self.registerproperties
 
   return, 1B
