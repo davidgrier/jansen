@@ -58,9 +58,8 @@ pro jansen_camera_pointgrey::InitializeProperties
 
   foreach property, self.properties.keys() do begin
      info = self.propertyinfo(property)
-     if ~info.present || ~info.manualSupported then $
-        continue
-     self.controlproperty, property, /manual
+     if info.present && info.manualSupported then $
+        self.controlproperty, property, /manual
   endforeach
 end
 
