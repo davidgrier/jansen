@@ -38,9 +38,20 @@ function jansen_configure_camera, configuration
      if execute('a = '+configuration['camera_dimensions'], 1, 1) then $
         dimensions = a
 
+  if configuration.haskey('camera_exposure_time') then $
+     exposure_time = float(configuration['camera_exposure_time'])
+
+  if configuration.haskey('camera_gain') then $
+     gain = float(configuration['camera_gain'])
+
+  if configuration.haskey('camera_frame_rate') then $
+     frame_rate = float(configuration['camera_frame_rate'])
+
   camera = obj_new(camera_object, greyscale = greyscale, $
                    order = order, hflip = hflip, $
-                   dimensions = dimensions, mpp = mpp)
+                   dimensions = dimensions, mpp = mpp, $
+                   exposure_time = exposure_time, $
+                   gain = gain, frame_rate = frame_rate)
 
   if ~isa(camera, 'jansen_camera') then $
      configuration['error'] = 'could not initialize camera'

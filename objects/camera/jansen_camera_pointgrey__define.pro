@@ -52,7 +52,9 @@
 ;
 ; jansen_camera_pointgrey::InitializeProperties
 ;
-pro jansen_camera_pointgrey::InitializeProperties
+pro jansen_camera_pointgrey::InitializeProperties, gain = gain, $
+   exposure_time = exposure_time, $
+   frame_rate = frame_rate
 
   COMPILE_OPT IDL2, HIDDEN
 
@@ -61,6 +63,15 @@ pro jansen_camera_pointgrey::InitializeProperties
      if info.present && info.manualSupported then $
         self.controlproperty, property, /manual
   endforeach
+
+  if isa(frame_rate, /number, /scalar) then $
+     self.setproperty, frame_rate = frame_rate
+
+  if isa(gain, /number, /scalar) then $
+     self.setproperty, gain = gain
+
+  if isa(exposure_time, /number, /scalar) then $
+     self.setproperty, exposure_time = exposure_time
 end
 
 ;;;;;
@@ -185,7 +196,7 @@ function jansen_camera_pointgrey::Init, _ref_extra = re
 
   self.grayscale = (size(*self.data, /n_dimensions) eq 2)
 
-  self.initializeproperties
+  self.initializeproperties, _extra = re
   self.registerproperties
 
   return, 1B
