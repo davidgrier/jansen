@@ -15,7 +15,7 @@
 ; MODIFICATION HISTORY:
 ; 2/14/2015 Written by David G. Grier, New York University
 ;
-; Copyright (c) 2015
+; Copyright (c) 2015 David G. Grier
 ;-
 pro jansen_object_event, event
 

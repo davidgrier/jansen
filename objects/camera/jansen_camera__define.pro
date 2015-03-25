@@ -6,19 +6,14 @@
 ;    Object interface for digital cameras
 ;
 ; INHERITS
-;    fab_object
+;    jansen_object
 ;
 ; PROPERTIES
-;    DATA
-;        [ G ] byte-valued array of image data
-;    DIMENSIONS
-;        [IG ] [w,h,[3]] dimensions of images
-;    ORDER
-;        [IGS] flag: if set, flip image vertically
-;    HFLIP
-;        [IGS] flag: if set, flip image horizontally
-;    MPP
-;        [IGS] Magnification [micrometers/pixel]
+; [ G ] DATA: byte-valued array of image data
+; [IG ] DIMENSIONS: [[3], w, h] dimensions of images
+; [IGS] ORDER: flag: if set, flip image vertically
+; [IGS] HFLIP: flag: if set, flip image horizontally
+; [IGS] MPP: Magnification [micrometers/pixel]
 ;
 ; METHODS
 ;    READ()
@@ -85,7 +80,7 @@ pro jansen_camera::SetProperty, dimensions = dimensions, $
 
   COMPILE_OPT IDL2, HIDDEN
 
-  self.fab_object::SetProperty, _extra = re
+  self.jansen_object::SetProperty, _extra = re
 
   if isa(dimensions, /number, /array) then $
      message, 'DIMENSIONS can only be set at initialization', /inf
@@ -113,7 +108,7 @@ pro jansen_camera::GetProperty, data = data, $
 
   COMPILE_OPT IDL2, HIDDEN
 
-  self.fab_object::GetProperty, _extra = re
+  self.jansen_object::GetProperty, _extra = re
 
   if arg_present(data) then $
      data = *self.data
@@ -159,7 +154,7 @@ function jansen_camera::Init, dimensions = dimensions, $
 
   COMPILE_OPT IDL2, HIDDEN
 
-  if ~self.fab_object::Init(_extra = re) then $
+  if ~self.jansen_object::Init(_extra = re) then $
      return, 0B
 
   if isa(dimensions, /number, /array) then begin
@@ -199,7 +194,7 @@ pro jansen_camera__define
   COMPILE_OPT IDL2, HIDDEN
 
   struct = {jansen_camera, $
-            inherits fab_object, $
+            inherits jansen_object, $
             data: ptr_new(), $
             order: 0L, $
             hflip: 0L, $

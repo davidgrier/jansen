@@ -8,9 +8,9 @@
 ;
 ; INHERITS:
 ;    jansen_camera
-;    dgghwpointgrey
+;    DGGhwPointGrey
 ;
-; REQUIREMENTS:
+; EXTERNAL LIBRARIES:
 ;    DGGhwPointGrey is defined in the idlpgr repository, which is
 ;    available at http://github.com/davidgrier/idlpgr
 ;    idlpgr provides IDL with a hardware interface to PointGrey's
@@ -106,7 +106,7 @@ pro jansen_camera_pointgrey::Read
 
   COMPILE_OPT IDL2, HIDDEN
 
-  self.data = ptr_new(self.dgghwpointgrey::read(), /no_copy)
+  self.data = ptr_new(self.dgghwpointgrey::read())
 
   if self.order then $
      *self.data = reverse(*self.data, 3 - self.grayscale, /overwrite)
@@ -182,7 +182,7 @@ function jansen_camera_pointgrey::Init, _ref_extra = re
   if ~self.dgghwpointgrey::Init(_extra = re) then $
      return, 0B
   
-  self.data = ptr_new(self.dgghwpointgrey::read(), /no_copy)
+  self.data = ptr_new(self.dgghwpointgrey::read())
 
   self.grayscale = (size(*self.data, /n_dimensions) eq 2)
 
