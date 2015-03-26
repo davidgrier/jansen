@@ -73,6 +73,7 @@ pro jansen_cleanup, tlb
      endif
   endforeach
 
+  jansen_screensaver, /resume
 end
 
 ;;;;;
@@ -169,4 +170,6 @@ pro jansen, state = state
   state['video'].screen = screen
   state['video'].play = 1
 
+  ;;; Suspend screensaver
+  jansen_screensaver, /suspend
 end
