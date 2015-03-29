@@ -116,8 +116,8 @@ pro jansen_camera_opencv__define
 
   COMPILE_OPT IDL2, HIDDEN
 
-  struct = {jansen_camera_opencv, $
-            inherits dgghwvideo, $
-            inherits jansen_camera $
+  struct = {jansen_camera_opencv,   $
+            inherits jansen_camera, $
+            inherits dgghwvideo     $
            }
 end
