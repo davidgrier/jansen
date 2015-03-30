@@ -116,10 +116,11 @@ pro jansen_camera_pointgrey::Read
 
   COMPILE_OPT IDL2, HIDDEN
 
-  self.data = ptr_new(self.dgghwpointgrey::read())
+  ptr_free, self.data
+  self.data = ptr_new(self.dgghwpointgrey::read(), /no_copy)
 
   if self.order then $
-     *self.data = reverse(*self.data, 3 - self.grayscale, /overwrite)
+     *self.data = reverse(temporary(*self.data), 3 - self.grayscale, /overwrite)
 end
 
 ;;;;;
