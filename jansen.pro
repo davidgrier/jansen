@@ -67,11 +67,9 @@ pro jansen_cleanup, tlb
 
   widget_control, tlb, get_uvalue = state, /no_copy
 
-  foreach key, state.keys() do begin
-     if (total(obj_valid(state[key])) ne 0) then begin
+  foreach key, state.keys() do $
+     if obj_valid(state[key]) then $
         obj_destroy, state[key]
-     endif
-  endforeach
 
 ;  jansen_screensaver, /resume
 end

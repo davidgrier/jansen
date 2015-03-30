@@ -212,6 +212,7 @@ pro jansen_video::Cleanup
 
   COMPILE_OPT IDL2, HIDDEN
 
+  self.IDLgrImage::Cleanup
   obj_destroy, self.camera
 end
 

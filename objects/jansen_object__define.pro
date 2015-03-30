@@ -91,6 +91,17 @@ pro jansen_object::GetProperty, all = all, $
    endif
 end
 
+;;;;
+;
+; jansen_object::Cleanup
+;
+pro jansen_object::Cleanup
+
+  COMPILE_OPT IDL2, HIDDEN
+
+  self.IDLitComponent::Cleanup
+end
+
 ;;;;;
 ;
 ; jansen_object::Init()

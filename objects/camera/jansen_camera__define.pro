@@ -137,6 +137,7 @@ pro jansen_camera::Cleanup
 
   COMPILE_OPT IDL2, HIDDEN
 
+  self.jansen_object::Cleanup
   ptr_free, self.data
 end
 
