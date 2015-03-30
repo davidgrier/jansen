@@ -60,7 +60,6 @@
 ;
 ; Copyright (c) 2015 David G. Grier
 ;-
-
 ;;;;;
 ;
 ; jansen_video::registerCallback
@@ -95,7 +94,6 @@ pro jansen_video::handleCallbacks
 
   foreach object, self.callbacks do $
      call_method, 'callback', object, self
-
 end
 
 ;;;;;
@@ -110,7 +108,6 @@ pro jansen_video::registerFilter, filter
      self.filter = filter
      filter.source = self.camera
   endif
-  
 end
 
 ;;;;;
@@ -133,10 +130,9 @@ pro jansen_video::handleTimerEvent, id, userdata
   COMPILE_OPT IDL2, HIDDEN
 
   self.timer = timer.set(self.time, self)
-  self.camera.read              ; update camera.data
-
+  
+  self.camera.read              ; update camera.data for filter
   self.IDLgrImage::SetProperty, data = self.filter.data
-;  self.parent.parent.draw
   self.screen.draw
 
   self.handleCallbacks
@@ -146,9 +142,9 @@ end
 ;
 ; jansen_video::SetProperty
 ;
-pro jansen_video::SetProperty, camera = camera, $
-                               playing =  playing, $
-                               screen = screen, $
+pro jansen_video::SetProperty, camera     = camera,     $
+                               playing    =  playing,   $
+                               screen     = screen,     $
                                frame_rate = frame_rate, $
                                _ref_extra = re
 
@@ -174,21 +170,20 @@ pro jansen_video::SetProperty, camera = camera, $
       
   if isa(frame_rate, /scalar, /number) then $
      self.time = 1./double(abs(frame_rate))
-
 end
 
 ;;;;;
 ;
 ; jansen_video::GetProperty
 ;
-pro jansen_video::GetProperty, data = data, $
+pro jansen_video::GetProperty, data       = data,       $
                                screendata = screendata, $
-                               camera = camera, $
-                               screen = screen, $
+                               camera     = camera,     $
+                               screen     = screen,     $
                                frame_rate = frame_rate, $
-                               playing = playing, $
-                               width = width, $
-                               height = height, $
+                               playing    = playing,    $
+                               width      = width,      $
+                               height     = height,     $
                                _ref_extra = re
   
   COMPILE_OPT IDL2, HIDDEN
@@ -196,29 +191,17 @@ pro jansen_video::GetProperty, data = data, $
   self.camera.getproperty, _extra = re
   self.IDLgrImage::GetProperty, _extra = re
 
-  if arg_present(data) then $
-     data = self.camera.data
+  if arg_present(data) then data = self.camera.data
 
   if arg_present(screendata) then $
      self.IDLgrImage::GetProperty, data = screendata
   
-  if arg_present(camera) then $
-     camera = self.camera
-
-  if arg_present(screen) then $
-     screen = self.screen
-
-  if arg_present(frame_rate) then $
-     frame_rate = 1./self.time
-
-  if arg_present(playing) then $
-     playing = self.playing
-
-  if arg_present(width) then $
-     width = (self.camera.dimensions)[0]
-
-  if arg_present(height) then $
-     height = (self.camera.dimensions)[1]
+  if arg_present(camera)     then camera     = self.camera
+  if arg_present(screen)     then screen     = self.screen
+  if arg_present(frame_rate) then frame_rate = 1./self.time
+  if arg_present(playing)    then playing    = self.playing
+  if arg_present(width)      then width      = (self.camera.dimensions)[0]
+  if arg_present(height)     then height     = (self.camera.dimensions)[1]
 end
 
 ;;;;;
@@ -236,8 +219,8 @@ end
 ;
 ; jansen_video::Init()
 ;
-function jansen_video::Init, camera = camera, $
-                             screen = screen, $
+function jansen_video::Init, camera     = camera,     $
+                             screen     = screen,     $
                              frame_rate = frame_rate, $
                              _ref_extra = re
 
@@ -264,12 +247,12 @@ function jansen_video::Init, camera = camera, $
 
   self.name = 'jansen_video '
   self.description = 'Video Image '
-  self.registerproperty, 'name', /string, /hide
+  self.registerproperty, 'name',        /string, /hide
   self.registerproperty, 'description', /string
-  self.registerproperty, 'playing', /boolean
-  self.registerproperty, 'frame_rate', /float
-  self.registerproperty, 'width', /integer, sensitive = 0
-  self.registerproperty, 'height', /integer, sensitive = 0
+  self.registerproperty, 'playing',     /boolean
+  self.registerproperty, 'frame_rate',  /float
+  self.registerproperty, 'width',       /integer, sensitive = 0
+  self.registerproperty, 'height',      /integer, sensitive = 0
 
   return, 1B
 end
@@ -282,15 +265,15 @@ pro jansen_video__define
 
   COMPILE_OPT IDL2, HIDDEN
 
-  struct = {jansen_video, $
-            inherits IDLgrImage, $
-            inherits IDL_Object, $
-            camera: obj_new(), $
-            screen: obj_new(), $
-            playing: 0L, $
-            time: 0.D, $
-            timer: 0L, $
-            filter: obj_new(), $
-            callbacks: obj_new() $
+  struct = {jansen_video,         $
+            inherits IDLgrImage,  $
+            inherits IDL_Object,  $
+            camera:    obj_new(), $
+            screen:    obj_new(), $
+            playing:   0L,        $
+            time:      0.D,       $
+            timer:     0L,        $
+            filter:    obj_new(), $
+            callbacks: obj_new()  $
            }
 end
