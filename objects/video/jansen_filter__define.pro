@@ -8,7 +8,6 @@ pro jansen_filter::GetProperty, data = data
 
   if arg_present(data) then $
      data = source.data
-
 end
 
 ;;;;;
@@ -21,7 +20,6 @@ pro jansen_filter::SetProperty, source = source
 
   if obj_valid(source) then $
      self.source = source
-
 end
 
 ;;;;;

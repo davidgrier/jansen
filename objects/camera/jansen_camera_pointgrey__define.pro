@@ -145,17 +145,13 @@ end
 ;
 ; jansen_camera_pointgrey::GetProperty
 ;
-pro jansen_camera_pointgrey::GetProperty, data = data, $
-                                          exposure_time = exposure_time, $
+pro jansen_camera_pointgrey::GetProperty, exposure_time = exposure_time, $
                                           _ref_extra = re
 
   COMPILE_OPT IDL2, HIDDEN
 
-  self.dgghwpointgrey::GetProperty, _extra = re
   self.jansen_camera::GetProperty, _extra = re
-
-  if arg_present(data) then $
-     data = *self.data
+  self.dgghwpointgrey::GetProperty, _extra = re
 
   if arg_present(exposure_time) then $
      self.dgghwpointgrey::GetProperty, shutter = exposure_time
