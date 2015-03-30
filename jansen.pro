@@ -42,7 +42,7 @@ pro jansen_event, event
         widget_control,  event.id, get_uvalue = uval
         case uval of
            'QUIT': begin
-              state['video'].playing = 0
+              state['video'].play = 0
               widget_control, event.top, /destroy
            end
            
@@ -73,7 +73,7 @@ pro jansen_cleanup, tlb
      endif
   endforeach
 
-  jansen_screensaver, /resume
+;  jansen_screensaver, /resume
 end
 
 ;;;;;
@@ -171,5 +171,5 @@ pro jansen, state = state
   state['video'].play = 1
 
   ;;; Suspend screensaver
-  jansen_screensaver, /suspend
+;  jansen_screensaver, /suspend
 end
