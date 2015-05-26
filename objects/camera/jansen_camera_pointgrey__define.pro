@@ -116,9 +116,8 @@ pro jansen_camera_pointgrey::Read
 
   COMPILE_OPT IDL2, HIDDEN
 
-  ptr_free, self.data
-  self.data = ptr_new(self.dgghwpointgrey::read(), /no_copy)
-
+  self.dgghwpointgrey::read
+  
   if self.order then $
      *self.data = reverse(temporary(*self.data), 3 - self.grayscale, /overwrite)
 end
@@ -188,8 +187,9 @@ function jansen_camera_pointgrey::Init, _ref_extra = re
 
   if ~self.dgghwpointgrey::Init(_extra = re) then $
      return, 0B
-  
-  self.data = ptr_new(self.dgghwpointgrey::read())
+
+  ptr_free, self.data
+  self.data = self._data
 
   self.grayscale = (size(*self.data, /n_dimensions) eq 2)
 
