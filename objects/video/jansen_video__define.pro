@@ -132,7 +132,8 @@ pro jansen_video::handleTimerEvent, id, userdata
   self.timer = timer.set(self.time, self)
   
   self.camera.read              ; update camera.data for filter
-  self.IDLgrImage::SetProperty, data = self.filter.data, /no_copy
+  data = self.filter.data
+  self.IDLgrImage::SetProperty, data = data, /no_copy
   self.screen.draw
 
   self.handleCallbacks
