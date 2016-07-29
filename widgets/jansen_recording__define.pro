@@ -7,31 +7,10 @@
 ;
 ; MODIFICATION HISTORY:
 ; 02/13/2015 Written by David G. Grier, New York University
+; 07/29/2016 DGG Overhaul for flexibility
 ;
-; Copyright (c) 2015 David G. Grier
+; Copyright (c) 2015-2016 David G. Grier
 ;-
-
-;;;;;
-;
-; jansen_recording::SaveImage
-;
-pro jansen_recording::SaveImage, image
-
-  COMPILE_OPT IDL2, HIDDEN
-
-  path = file_search(self.directory, /expand_tilde, /expand_environment, /test_directory)
-  
-  filename = dialog_pickfile(title = 'Save Snapshot', $
-                             filter = '*.png', /fix_filter, $
-                             path = path, $
-                             file = 'jansen_snapshot', $
-                             default_extension = 'png', $
-                             /write, /overwrite_prompt, $
-                             resource_name = 'Jansen')
-  if strlen(filename) gt 0 then $
-     write_png, filename, image
-end
-
 
 ;;;;;
 ;
@@ -47,7 +26,7 @@ pro jansen_recording::handleEvent, event
   video = state.video
   
   case uval of
-     'NAME': begin
+     'FILENAME': begin
         filename = self.filename
         self.filename = event.value
         if ~self.hasvalidfilename() then begin
@@ -100,10 +79,14 @@ pro jansen_recording::handleEvent, event
               video.playing = 1
            end
            
-           'SNAPSHOT': self.saveimage, video.screendata
-              
+           'SNAPSHOT': void = dialog_write_image(video.screendata, $
+                                                 title = 'Save Snapshot', $
+                                                 filename = 'jansen_snapshot.png', $
+                                                 type = 'png', $
+                                                 path = self.directory, $
+                                                 /warn_exist)
+           
            else:
-        endcase
      end
 
      'REPLAY': begin
@@ -330,7 +313,7 @@ pro jansen_recording::Create, wtop
 
   void = cw_field(wrecording, /FRAME, /RETURN_EVENTS, $
                   VALUE = self.filename, $
-                  title = 'File Name:', UVALUE = 'NAME')
+                  title = 'File Name:', UVALUE = 'FILENAME')
   
   wtgt = cw_field(wrecording, /FRAME, /RETURN_EVENTS, /ULONG, $
                   VALUE = 1000UL, $
