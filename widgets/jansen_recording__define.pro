@@ -35,7 +35,7 @@ end
 
 ;;;;;
 ;
-; jansen_recording_event
+; jansen_recording::handleEvent
 ;
 pro jansen_recording::handleEvent, event
 
