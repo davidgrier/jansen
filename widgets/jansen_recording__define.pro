@@ -318,6 +318,8 @@ end
 ;
 ; jansen_recording::Create
 ;
+; Create widget hierarchy
+;
 pro jansen_recording::Create, wtop
 
   COMPILE_OPT IDL2, HIDDEN
