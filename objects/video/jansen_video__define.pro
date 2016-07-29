@@ -132,7 +132,8 @@ pro jansen_video::handleTimerEvent, id, userdata
   self.timer = timer.set(self.time, self)
   
   self.camera.read              ; update camera.data for filter
-  self.IDLgrImage::SetProperty, data = self.filter.data
+  data = self.filter.data
+  self.IDLgrImage::SetProperty, data = data, /no_copy
   self.screen.draw
 
   self.handleCallbacks
@@ -238,7 +239,7 @@ function jansen_video::Init, camera     = camera,     $
   if isa(screen, 'IDLgrWindow') then $
      self.screen = screen
 
-  if ~self.IDLgrImage::Init(imagedata, _extra = re) then $
+  if ~self.IDLgrImage::Init(imagedata, /no_copy, _extra = re) then $
      return, 0B
 
   self.time = (isa(frame_rate, /scalar, /number)) ? $

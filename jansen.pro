@@ -169,5 +169,5 @@ pro jansen, state = state
   state['video'].play = 1
 
   ;;; Suspend screensaver
-;  jansen_screensaver, /suspend
+  ; jansen_screensaver, /suspend
 end

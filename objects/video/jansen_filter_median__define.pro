@@ -25,7 +25,7 @@
 ; MODIFICATION HISTORY:
 ; 03/15/2015 Written by David G. Grier, New York University
 ;
-; Copyright (c) David G. Grier
+; Copyright (c) 2015 David G. Grier
 ;-
 ;;;;;
 ;
@@ -42,7 +42,7 @@ pro jansen_filter_median::GetProperty, data = data, $
      if obj_valid(self.median) then begin
         if self.running || ~self.median.initialized then $
            self.median.add, data
-        data = byte(128.*float(data)/self.median.get())
+        data = byte(128.*float(temporary(data))/self.median.get())
      endif
   endif
 
