@@ -132,7 +132,8 @@ end
 ;
 ; jansen_widget::Init()
 ;
-function jansen_widget::Init, wtop
+function jansen_widget::Init, wtop, $
+                              name = name
 
   COMPILE_OPT IDL2, HIDDEN
 
