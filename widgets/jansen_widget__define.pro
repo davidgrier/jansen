@@ -132,14 +132,14 @@ end
 ;
 ; jansen_widget::Init()
 ;
-function jansen_widget::Init, wtop, $
-                              name = name
+function jansen_widget::Init, wtop
 
   COMPILE_OPT IDL2, HIDDEN
 
   if ~isa(wtop, /number, /scalar) then $
      return, 0B
-  self.name = isa(name, 'string') ? name[0] : obj_class(self)
+;  self.name = isa(name, 'string') ? name[0] : obj_class(self)
+  self.name = obj_class(self)
   if isa(title, 'string') then $
      self.title = title
   self.create, wtop
