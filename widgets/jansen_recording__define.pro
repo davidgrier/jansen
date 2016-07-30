@@ -46,7 +46,7 @@ pro jansen_recording::handleEvent, event
                     endif
                     if isa(self.recorder, 'h5video') then begin
                        video.registercallback, 'recorder', self
-                       self.frn = 0
+                       self.framenumber = 0UL
                        self.state = 'RECORDING'
                     endif
                  end
@@ -186,21 +186,18 @@ pro jansen_recording::setfilename, _filename
 
   ;; check that directory is writeable
   if ~file_test(directory, /directory, /write) then begin
-     res = dialog_message('Cannot write to '+directory)
+     res = dialog_message('Cannot write to ' + directory)
      return
   endif
 
   ;; format directory string
   directory = file_search(directory, /expand_tilde, /expand_environment, /mark_directory)
   
-  ;; check for overwriting
+  ;; check that file is writeable
   fullname = directory + filename
-  if file_test(fullname) then begin
-
-     if ~file_test(fullname, /write) then begin
-        res = dialog_message('Cannot overwrite '+fullname, /center)
-        return
-     endif
+  if file_test(fullname) && ~file_test(fullname, /write) then begin
+     res = dialog_message('Cannot overwrite ' + fullname, /center)
+     return
   endif
 
   self.filename = fullname
@@ -249,16 +246,16 @@ pro jansen_recording::Callback, video
 
   if (self.state eq 'RECORDING') then begin
      widget_control, self.wtgt, get_value = target
-     if self.frn lt target then begin
+     if self.framenumber lt target then begin
         self.recorder.write, video.data ; (self.state eq 'RECORDING') ? video.data : video.screendata
-        self.frn++
+        self.framenumber++
      endif else begin
         video.unregistercallback, 'recorder'
         self.state = 'NORMAL'
         self.recorder.close
-        self.frn = 0
+        self.framenumber = 0
      endelse
-     widget_control, self.wfrn, set_value = self.frn     
+     widget_control, self.wfrn, set_value = self.framenumber    
   endif else if (self.state eq 'REPLAYING') then begin
      widget_control, self.wfrn, set_value = self.recorder.index
   endif
@@ -319,7 +316,7 @@ pro jansen_recording::Create, wtop
   self.state = 'NORMAL'
   self.wtgt = wtgt
   self.wfrn = wfrn
-  self.frn = 0
+  self.framenumber = 0UL
   self.widget_id = wrecording
 end
 
@@ -356,7 +353,7 @@ pro jansen_recording__define
             recorder: obj_new(), $
             filename: '', $            
             wtgt: 0L, $
-            frn: 0UL, $
+            framenumber: 0UL, $
             wfrn: 0L $
            }
 end
