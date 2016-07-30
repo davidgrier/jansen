@@ -27,12 +27,7 @@ pro jansen_recording::handleEvent, event
   
   case uval of
      'FILENAME': begin
-        filename = self.filename
-        self.filename = event.value
-        if ~self.hasvalidfilename() then begin
-           if ~self.hasvalidfilename(/read) then $
-              self.filename = filename
-        endif
+        self.setfilename, event.value
         widget_control, event.id, set_value = self.filename
      end
      
@@ -42,15 +37,17 @@ pro jansen_recording::handleEvent, event
         case event.value of
            'RECORD': begin
               case self.state of
-                 'NORMAL': begin                    ; ... not recording, so start
-                    if (filename = self.hasvalidfilename()) then begin
-                       self.recorder = h5video(filename, /overwrite, $
+                 'NORMAL': begin ; ... not recording, so start
+                    if ~file_test(self.filename) || $
+                       (dialog_message([self.filename + ' already exists.', 'Overwrite?'], $
+                                       /question, /default_no, /center) eq 'Yes') then begin
+                       self.recorder = h5video(self.filename, /overwrite, $
                                                metadata = self.metadata(state))
-                       if isa(self.recorder, 'h5video') then begin
-                          video.registercallback, 'recorder', self
-                          self.frn = 0
-                          self.state = 'RECORDING'
-                       endif
+                    endif
+                    if isa(self.recorder, 'h5video') then begin
+                       video.registercallback, 'recorder', self
+                       self.frn = 0
+                       self.state = 'RECORDING'
                     endif
                  end
                  'PAUSED': self.state = 'RECORDING' ; ... paused, so unpause
@@ -83,10 +80,11 @@ pro jansen_recording::handleEvent, event
                                                  title = 'Save Snapshot', $
                                                  filename = 'jansen_snapshot.png', $
                                                  type = 'png', $
-                                                 path = self.directory, $
+                                                 path = file_dirname(self.filename), $
                                                  /warn_exist)
            
            else:
+        endcase
      end
 
      'REPLAY': begin
@@ -116,15 +114,12 @@ pro jansen_recording::handleEvent, event
                     self.recorder.close
                  endif
                  ;; open replay file
-                 filename = self.hasvalidfilename(/read)
-                 if isa(filename, 'string') then begin
+                 self.recorder = h5video(self.filename) ; open for reading
+                 if isa(self.recorder, 'h5video') then begin
+                    video.camera = self.recorder
+                    video.registercallback, 'recorder', self
+                    self.state = 'REPLAYING'
                     video.playing = 0
-                    self.recorder = h5video(filename) ; open for reading
-                    if isa(self.recorder, 'h5video') then begin
-                       video.camera = self.recorder
-                       video.registercallback, 'recorder', self
-                       self.state = 'REPLAYING'
-                    endif
                  endif
               endif else $
                  self.recorder.stepsize = 1
@@ -169,74 +164,46 @@ end
 
 ;;;;;
 ;
-; jansen_recording::hasvalidfilename
+; jansen_recording::setfilename
 ;
-function jansen_recording::hasvalidfilename, read = read
+; Update fully-qualified filename for saving video files
+;
+pro jansen_recording::setfilename, _filename
 
   COMPILE_OPT IDL2
 
-  filename = self.filename
-  directory = self.directory
+  if strlen(_filename) eq 0 then return ; nothing to do
 
-  write_flag = ~keyword_set(read)
+  ;; separate fully-qualified filename, if necessary
+  filename = file_basename(_filename)
+  directory = strmatch(_filename, '*'+path_sep()+'*') ? $
+              file_dirname(_filename) : $
+              file_dirname(self.filename)
 
-;  if (filename.length eq 0) then $ ; IDL 8.4
-  if strlen(filename) eq 0 then $
-     return, 0
-
-;  if filename.contains(path_sep()) then begin ; IDL 8.4
-  if strmatch(filename, '*'+path_sep()+'*') then begin
-     directory = file_dirname(filename)
-     filename = file_basename(filename)
-  endif
-
-  ;; Check that directory exists, or can be created
-  if write_flag then begin
-     if ~file_test(directory, /directory) then $
+  ;; create directory, if necessary
+  if ~file_test(directory, /directory) then $
      file_mkdir, directory
 
-     if ~file_test(directory, /directory, /write) then begin
-        res = dialog_message('Cannot write to '+directory)
-        return, 0
-     endif
-  endif else begin
-     if ~file_test(directory, /directory, /read) then begin
-        res = dialog_message('Cannot read from '+directory)
-        return, 0
-     endif
-  endelse
+  ;; check that directory is writeable
+  if ~file_test(directory, /directory, /write) then begin
+     res = dialog_message('Cannot write to '+directory)
+     return
+  endif
 
+  ;; format directory string
   directory = file_search(directory, /expand_tilde, /expand_environment, /mark_directory)
   
-;  if ~filename.endswith('.h5', /fold_case) then $ ; IDL 8.4
-  if ~strmatch(filename, '*.h5', /fold_case) then $
-     filename += '.h5'
-  
+  ;; check for overwriting
   fullname = directory + filename
+  if file_test(fullname) then begin
 
-  ;; Check that file can be written, or read, as needed
-  if write_flag then begin
-     if file_test(fullname) then begin
-        res = dialog_message([fullname + ' already exists.', 'Overwrite?'], $
-                             /question, /default_no, /center)
-        if (res eq 'No') then $
-           return, 0
-        if ~file_test(fullname, /write) then begin
-           res = dialog_message('Cannot overwrite '+fullname, /center)
-           return, 0
-        endif
+     if ~file_test(fullname, /write) then begin
+        res = dialog_message('Cannot overwrite '+fullname, /center)
+        return
      endif
-  endif else begin
-     if ~file_test(fullname) then begin
-        res = dialog_message('Cannot read '+fullname, /center)
-        return, 0
-     endif
-  endelse
+  endif
 
-  self.directory = directory
-  self.filename = filename
-
-  return, fullname
+  self.filename = fullname
 end
 
 ;;;;;
@@ -367,8 +334,9 @@ function jansen_recording::Init, wtop, configuration, title
 
   COMPILE_OPT IDL2, HIDDEN
 
-  self.directory = isa(configuration.directory, 'string') ? configuration.directory : '~/data'
-  self.filename = isa(configuration.filename, 'string') ? configuration.filename : 'jansen.h5'
+  directory = isa(configuration.directory, 'string') ? configuration.directory : '~/data'
+  filename = isa(configuration.filename, 'string') ? configuration.filename : 'jansen.h5'
+  self.setfilename, directory + path_sep() + filename
   self.title = title
   return, self.Jansen_Widget::Init(wtop) 
 end
@@ -386,7 +354,6 @@ pro jansen_recording__define
             title: '', $
             state: '', $        ; 'paused', 'recording', 'replaying'
             recorder: obj_new(), $
-            directory: '', $
             filename: '', $            
             wtgt: 0L, $
             frn: 0UL, $
