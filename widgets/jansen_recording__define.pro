@@ -121,8 +121,8 @@ pro jansen_recording::handleEvent, event
                     self.state = 'REPLAYING'
                     video.playing = 0
                  endif
-              endif else $
-                 self.recorder.stepsize = 1
+              endif
+              self.recorder.stepsize = 1
               video.playing = 1
            end
            
