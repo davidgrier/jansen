@@ -45,7 +45,7 @@ pro jansen_dvr::handleEvent, event
                                                metadata = self.metadata(state))
                     endif
                     if isa(self.recorder, 'h5video') then begin
-                       video.registercallback, 'recorder', self
+                       video.registercallback, 'dvr', self
                        self.framenumber = 0UL
                        self.state = 'RECORDING'
                     endif
@@ -69,7 +69,7 @@ pro jansen_dvr::handleEvent, event
               if (self.state eq 'REPLAYING') then $
                  video.camera = state.camera
               if (self.state ne 'NORMAL') then begin
-                 video.unregistercallback, 'recorder'
+                 video.unregistercallback, 'dvr'
                  self.recorder.close
               endif
               self.state = 'NORMAL'
@@ -247,7 +247,7 @@ pro jansen_dvr::Callback, video
   if (self.state eq 'RECORDING') then begin
      widget_control, self.wtgt, get_value = target
      if self.framenumber lt target then begin
-        self.recorder.write, video.data ; (self.state eq 'RECORDING') ? video.data : video.screendata
+        self.recorder.write, video.data
         self.framenumber++
      endif else begin
         video.unregistercallback, 'recorder'
