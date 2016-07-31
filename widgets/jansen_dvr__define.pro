@@ -1,6 +1,6 @@
 ;+
 ; NAME:
-;    jansen_recording
+;    jansen_dvr
 ;
 ; PURPOSE:
 ;    Control panel for recording video data.
@@ -14,11 +14,11 @@
 
 ;;;;;
 ;
-; jansen_recording::handleEvent
+; jansen_dvr::handleEvent
 ;
-pro jansen_recording::handleEvent, event
+pro jansen_dvr::handleEvent, event
 
-  COMPILE_OPT IDL2, HIDDEN
+  COMPILE_OPT IDL2
 
   widget_control, event.top, get_uvalue = state
   widget_control, event.id,  get_uvalue = uval
@@ -164,11 +164,11 @@ end
 
 ;;;;;
 ;
-; jansen_recording::setfilename
+; jansen_dvr::setfilename
 ;
 ; Update fully-qualified filename for saving video files
 ;
-pro jansen_recording::setfilename, _filename
+pro jansen_dvr::setfilename, _filename
 
   COMPILE_OPT IDL2
 
@@ -205,11 +205,11 @@ end
 
 ;;;;;
 ;
-; jansen_recording::metadata()
+; jansen_dvr::metadata()
 ;
-function jansen_recording::metadata, state
+function jansen_dvr::metadata, state
 
-  COMPILE_OPT IDL2, HIDDEN
+  COMPILE_OPT IDL2
 
   info = get_login_info()
 
@@ -236,13 +236,13 @@ end
 
 ;;;;;
 ;
-; jansen_recording::Callback
+; jansen_dvr::Callback
 ;
 ; Update the control panel based on current recording activity
 ;
-pro jansen_recording::Callback, video
+pro jansen_dvr::Callback, video
 
-  COMPILE_OPT IDL2, HIDDEN
+  COMPILE_OPT IDL2
 
   if (self.state eq 'RECORDING') then begin
      widget_control, self.wtgt, get_value = target
@@ -263,13 +263,13 @@ end
 
 ;;;;;
 ;
-; jansen_recording::Create
+; jansen_dvr::Create
 ;
 ; Create widget hierarchy
 ;
-pro jansen_recording::Create, wtop
+pro jansen_dvr::Create, wtop
 
-  COMPILE_OPT IDL2, HIDDEN
+  COMPILE_OPT IDL2
   
   wrecording = widget_base(wtop, /COLUMN, /GRID_LAYOUT, $
                            TITLE = self.title, $               ; for WIDGET_TAB
@@ -302,9 +302,9 @@ pro jansen_recording::Create, wtop
                   VALUE = 0UL, $
                   title = 'Frame #:  ')
   
-  wftn = cw_field(wrecording, /FRAME, /NOEDIT, /ULONG, $
-                  VALUE = 0UL, $
-                  title = 'Feature #:')
+  ;wftn = cw_field(wrecording, /FRAME, /NOEDIT, /ULONG, $
+  ;                VALUE = 0UL, $
+  ;                title = 'Feature #:')
 
   bvalues = ['Normal', 'Running', 'Sample/Hold']
   void = cw_bgroup(wrecording, bvalues, $
@@ -322,31 +322,30 @@ end
 
 ;;;;;
 ;
-; jansen_recording::Init()
+; jansen_dvr::Init()
 ;
 ; Create the widget layout and set up the callback for the
 ; video recording object.
 ;
-function jansen_recording::Init, wtop, configuration, title
+function jansen_dvr::Init, wtop, configuration, title
 
-  COMPILE_OPT IDL2, HIDDEN
+  COMPILE_OPT IDL2
 
-  directory = isa(configuration.directory, 'string') ? configuration.directory : '~/data'
-  filename = isa(configuration.filename, 'string') ? configuration.filename : 'jansen.h5'
-  self.setfilename, directory + path_sep() + filename
+  fullname = configuration.directory + path_sep() + configuration.filename
+  self.setfilename, fullname
   self.title = title
   return, self.Jansen_Widget::Init(wtop) 
 end
 
 ;;;;;
 ;
-; jansen_recording__define
+; jansen_dvr__define
 ;
-pro jansen_recording__define
+pro jansen_dvr__define
 
   COMPILE_OPT IDL2, HIDDEN
 
-  struct = {Jansen_Recording, $
+  struct = {Jansen_DVR, $
             inherits Jansen_Widget, $
             title: '', $
             state: '', $        ; 'paused', 'recording', 'replaying'

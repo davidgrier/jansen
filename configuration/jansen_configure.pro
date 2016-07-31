@@ -15,8 +15,9 @@
 ;
 ; MODIFICATION HISTORY:
 ; 02/12/2015 Written by David G. Grier, New York University
+; 07/29/2015 DGG Update for DVR functionality
 ;
-; Copyright (c) 2015 David G. Grier
+; Copyright (c) 2015-2016 David G. Grier
 ;-
 function jansen_configure
 
@@ -46,7 +47,7 @@ function jansen_configure
   components = list('error')
   components.add, jansen_configure_camera(configuration)
   components.add, jansen_configure_video(configuration)
-  components.add, jansen_configure_recording(configuration)
+  components.add, jansen_configure_dvr(configuration)
   components.add, nuconf_imagelaser(configuration)
   components.add, nuconf_stage(configuration)
 
