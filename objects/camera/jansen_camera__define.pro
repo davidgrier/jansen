@@ -62,9 +62,9 @@ pro jansen_camera::read
 
   dimensions = size(*self.data, /dimensions)
   *self.data = byte(255*randomu(seed, dimensions))
-  if self.hflip then $
+  if self._hflip then $
      *self.data = reverse(*self.data, 1, /overwrite)
-  if self.order then $
+  if self._order then $
      *self.data = reverse(*self.data, 2, /overwrite)
 end
 
@@ -86,10 +86,10 @@ pro jansen_camera::SetProperty, dimensions = dimensions, $
      message, 'DIMENSIONS can only be set at initialization', /inf
 
   if isa(order, /scalar, /number) then $
-     self.order = (order ne 0)
+     self._order = (order ne 0)
 
   if isa(hflip, /scalar, /number) then $
-     self.hflip = keyword_set(hflip)
+     self._hflip = keyword_set(hflip)
 
   if isa(mpp, /scalar, /number) then $
      self.mpp = mpp
@@ -123,10 +123,10 @@ pro jansen_camera::GetProperty, data = data, $
      mpp = self.mpp
 
   if arg_present(order) then $
-     order = self.order
+     order = self._order
 
   if arg_present(hflip) then $
-     hflip = self.hflip
+     hflip = self._hflip
 end
                             
 ;;;;;
@@ -151,11 +151,11 @@ function jansen_camera::Init, dimensions = dimensions, $
                               order = order, $
                               hflip = hflip, $
                               mpp = mpp, $
-                              _ref_extra = re
+                              _extra = ex
 
   COMPILE_OPT IDL2, HIDDEN
 
-  if ~self.jansen_object::Init(_extra = re) then $
+  if ~self.jansen_object::Init(_extra = ex) then $
      return, 0B
 
   if isa(dimensions, /number, /array) then begin
@@ -168,10 +168,10 @@ function jansen_camera::Init, dimensions = dimensions, $
      self.mpp = float(mpp)
 
   if isa(order, /scalar, /number) then $
-     self.order = keyword_set(order)
+     self._order = keyword_set(order)
 
   if isa(hflip, /scalar, /number) then $
-     self.hflip = keyword_set(hflip)
+     self._hflip = keyword_set(hflip)
 
   self.data = ptr_new(make_array(dimensions, /byte), /no_copy)
 
@@ -197,8 +197,8 @@ pro jansen_camera__define
   struct = {jansen_camera, $
             inherits jansen_object, $
             data: ptr_new(), $
-            order: 0L, $
-            hflip: 0L, $
+            _order: 0L, $
+            _hflip: 0L, $
             mpp: 0. $
            }
 end
