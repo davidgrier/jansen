@@ -34,10 +34,6 @@ pro jansen_camera_opencv::Read
   COMPILE_OPT IDL2, HIDDEN
 
   self.data = ptr_new(self.dgghwvideo::read(), /no_copy)
-  if self.hflip then $
-     *self.data = reverse(temporary(*self.data), 2 - self.grayscale, /overwrite)
-  if self.order then $
-     *self.data = reverse(temporary(*self.data), 3 - self.grayscale, /overwrite)
 end
 
 ;;;;;
